@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "allowUnreachableCode": false,
+    "alwaysStrict": true,
+    "esModuleInterop": false,
+    "lib": [
+      "es2019"
+    ],
+    "module": "commonjs",
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
+    "noImplicitThis": false,
+    "noUnusedLocals": false,
+    "outDir": "dist",
+    "preserveConstEnums": true,
+    "removeComments": false,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strictNullChecks": true,
+    "target": "es2019",
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "declaration": true
+  },
+  "include": [
+    "index.ts",
+    "src"
+  ],
+  "exclude": [
+    "**/*.d.ts",
+    "node_modules",
+    "dist",
+  ]
+}

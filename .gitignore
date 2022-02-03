@@ -1,0 +1,15 @@
+/node_modules
+/dist
+/build
+/.nyc_output
+/coverage
+/yarn-error.log
+
+# Emacs LSP logs
+/.log
+
+# BDD rerun state
+@rerun.txt
+
+# BDD coverage
+usage.txt
