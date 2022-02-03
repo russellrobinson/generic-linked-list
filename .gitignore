@@ -4,6 +4,7 @@
 /.nyc_output
 /coverage
 /yarn-error.log
+/*.tgz
 
 # Emacs LSP logs
 /.log
@@ -13,3 +14,4 @@
 
 # BDD coverage
 usage.txt
+
