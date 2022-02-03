@@ -5,6 +5,7 @@
 /yarn-error.log
 /*.iml
 /.idea
+/*.tgz
 
 # Emacs LSP logs
 /.log
