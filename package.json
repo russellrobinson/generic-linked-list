@@ -13,6 +13,7 @@
     "test:with-coverage": "nyc mocha",
     "build": "run-s clean:build compile",
     "clean": "rimraf dist node_modules",
+    "clean:build": "rimraf dist",
     "compile": "tsc",
     "build:watch": "rimraf dist && tsc -w",
     "prepublish": "yarn build && yarn test",
