@@ -11,7 +11,7 @@ describe('linked-list', () => {
     function appendList(count: number): LinkedList<number> {
       const list = new LinkedList<number>();
       for (let ii = 0; ii < count; ii++) {
-        list.append(ii);
+        list.push(ii);
       }
       return list;
     }
@@ -19,7 +19,7 @@ describe('linked-list', () => {
     function insertList(count: number): LinkedList<number> {
       const list = new LinkedList<number>();
       for (let ii = count; --ii >= 0;) {
-        list.insert(ii);
+        list.unshift(ii);
       }
       return list;
     }
@@ -27,46 +27,46 @@ describe('linked-list', () => {
     it('instantiates', () => {
       const list = new LinkedList<number>();
 
-      expect(list.size).to.equal(0);
+      expect(list.length).to.equal(0);
       expect(list.shift()).to.be.undefined;
     });
 
-    describe('append', () => {
-      it('returns the new size', () => {
+    describe('push', () => {
+      it('returns the new length', () => {
         const list = new LinkedList<number>();
 
-        expect(list.append(42)).to.equal(1);
-        expect(list.append(42)).to.equal(2);
+        expect(list.push(42)).to.equal(1);
+        expect(list.push(42)).to.equal(2);
       });
       it('appends and retrieves', () => {
         const count = 10_000;
         const list = appendList(count);
 
-        expect(list.size).to.equal(count);
+        expect(list.length).to.equal(count);
         for (let ii = 0; ii < count; ii++) {
           expect(list.shift()).to.equal(ii);
         }
-        expect(list.size).to.equal(0);
+        expect(list.length).to.equal(0);
         expect(list.shift()).to.be.undefined;
       });
     });
-    describe('insert', () => {
-      it('returns the new size', () => {
+    describe('unshift', () => {
+      it('returns the new length', () => {
         const list = new LinkedList<number>();
 
-        expect(list.insert(42)).to.equal(1);
-        expect(list.insert(42)).to.equal(2);
+        expect(list.unshift(42)).to.equal(1);
+        expect(list.unshift(42)).to.equal(2);
       });
 
       it('inserts and retrieves', () => {
         const count = 10_000;
         const list = insertList(count);
 
-        expect(list.size).to.equal(count);
+        expect(list.length).to.equal(count);
         for (let ii = 0; ii < count; ii++) {
           expect(list.shift()).to.equal(ii);
         }
-        expect(list.size).to.equal(0);
+        expect(list.length).to.equal(0);
         expect(list.shift()).to.be.undefined;
       });
     });
@@ -89,9 +89,9 @@ describe('linked-list', () => {
       }
 
       //
-      // Linked list is much faster for insert than array on large lengths
+      // Linked list is much faster for unshift than array on large lengths
       //
-      it('inserts faster than arrays', function () {
+      it('inserts (unshifts) faster than arrays', function () {
         this.timeout(20_000);   // event loop is blocked, so this only affects the end
         const count = 300_000;
         const speedFactor = 200;      //  much faster than this, but affected by coverage
@@ -100,7 +100,7 @@ describe('linked-list', () => {
           const start = hrtime.bigint();
           const list = appendList(count);
           const end = hrtime.bigint();
-          expect(list.size).to.equal(count);
+          expect(list.length).to.equal(count);
 
           return Number(end - start) / 1_000_000;    // return milliseconds
         };
@@ -117,7 +117,7 @@ describe('linked-list', () => {
         const listTimeMs = runList();
         const arrayTimeMs = runArray();
 
-        console.log(`Array is ${(arrayTimeMs / listTimeMs).toFixed(1)} times slower than LinkedList for insert`);
+        console.log(`Array is ${(arrayTimeMs / listTimeMs).toFixed(1)} times slower than LinkedList for unshift`);
         expect(arrayTimeMs / listTimeMs).to.be.greaterThan(speedFactor);
       });
 
@@ -137,7 +137,7 @@ describe('linked-list', () => {
             list.shift();
           }
           const end = hrtime.bigint();
-          expect(list.size).to.equal(0);
+          expect(list.length).to.equal(0);
 
           return Number(end - start) / 1_000_000;    // return milliseconds
         };

@@ -50,21 +50,19 @@ class DoubleLinkedListNode<T> extends LinkedListNode<T> {
 /**
  * Implementation of a simple generic singly-linked Linked List.
  * Ideal to replace large arrays where you:
- *  - insert at the beginning
- *  - append to the end
- *  - remove from the beginning
- * as these operations are O(1) for a linked list, but O(n) for an array removal at the beginning.
- * I wrote this instead of using an NPM package, because all the NPM packages are poorly documented
- * and don't use generics
+ *  - insert at the beginning (unshift)
+ *  - append to the end (push)
+ *  - remove from the beginning (shift)
+ * as these operations are O(1) for a linked list, but O(n) for the above array operations.
  */
 export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> {
   protected _root: LinkedListNode<T> | undefined;
   protected _end: LinkedListNode<T> | undefined;
-  protected _size: number;
+  protected _length: number;
 
   constructor() {
     this._root = this._end = undefined;
-    this._size = 0;
+    this._length = 0;
   }
 
   protected _createNode(value: T): LinkedListNode<T> {
@@ -74,12 +72,13 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> {
   /**
    * Append to the end of a list
    * @param value
+   * @returns the new length of the list
    */
-  public append(value: T): number {
+  public push(value: T): number {
     const node = this._createNode(value);
     if (this._root === undefined) {
-      if (this._size !== 0) {
-        throw Error('LinkedList.append logic failure (size > 0)!');
+      if (this._length !== 0) {
+        throw Error('LinkedList.push logic failure (length > 0)!');
       }
 
       this._root = node;
@@ -87,40 +86,41 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> {
 
     } else {
       if (this._end === undefined) {
-        throw Error('LinkedList.append logic failure (end is undefined)!');
+        throw Error('LinkedList.push logic failure (end is undefined)!');
       }
 
       this._end.next = node;
       this._end = node;
     }
-    this._size++;
-    return this._size;
+    this._length++;
+    return this._length;
   }
 
   /**
    * Insert at the beginning of a list
    * @param value
+   * @returns the new length of the list
    */
-  public insert(value: T): number {
+  public unshift(value: T): number {
     const node = this._createNode(value);
     if (this._root === undefined) {
-      this.append(value);
+      this.push(value);
     } else {
       node.next = this._root;
       this._root = node;
-      this._size++;
+      this._length++;
     }
-    return this._size;
+    return this._length;
   }
 
   /**
    * Remove the first element from the list.
-   * Similar to Array.shift
+   * @returns the new length of the list
    */
   public shift(): T | undefined {
     let result: T | undefined = undefined;
 
-    if (this._size !== 0) {
+    if (this._length !== 0) {
       if (this._root === undefined) {
         throw Error('LinkedList.shift logic failure (root is undefined)!');
       }
@@ -133,19 +133,19 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> {
         // List is now empty
         //
         this._end = undefined;
-        if (this._size !== 1) {
-          throw Error('LinkedList.shift logic failure (size is wrong)!');
+        if (this._length !== 1) {
+          throw Error('LinkedList.shift logic failure (length is wrong)!');
         }
       }
-      this._size--;
+      this._length--;
     }
     return result;
   }
 
   /**
-   * Get the size of the list.
+   * Get the length of the list.
    */
-  get size(): number {
-    return this._size;
+  get length(): number {
+    return this._length;
   }
 }
