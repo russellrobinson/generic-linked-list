@@ -16,7 +16,7 @@
     "clean:build": "rimraf dist",
     "compile": "tsc",
     "build:watch": "rimraf dist && tsc -w",
-    "prepublish": "yarn build && yarn test",
+    "prepare": "yarn build && yarn test",
     "postpublish": "PACKAGE_ID=$(cat package.json | grep -E \"^[[:space:]]*\\\"(name|version)\\\":[[:space:]]*\\\"(.*)\\\"\" | sed -re 's|.*:[[:space:]]*\\\"(.*)\\\",|\\1|' | paste -d  \"@\"  - -) && git tag $PACKAGE_ID && git push --tags"
   },
   "devDependencies": {
