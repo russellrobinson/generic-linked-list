@@ -3,6 +3,8 @@
 /.nyc_output
 /coverage
 /yarn-error.log
+/*.iml
+/.idea
 
 # Emacs LSP logs
 /.log
