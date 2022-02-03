@@ -12,10 +12,9 @@
     "test:clean-coverage": "rimraf .nyc_output",
     "test:with-coverage": "nyc mocha",
     "build": "run-s clean:build compile",
-    "clean": "rimraf build node_modules",
-    "clean:build": "rimraf build",
+    "clean": "rimraf dist node_modules",
     "compile": "tsc",
-    "build:watch": "rimraf build && tsc -w",
+    "build:watch": "rimraf dist && tsc -w",
     "prepublish": "yarn build && yarn test",
     "postpublish": "PACKAGE_ID=$(cat package.json | grep -E \"^[[:space:]]*\\\"(name|version)\\\":[[:space:]]*\\\"(.*)\\\"\" | sed -re 's|.*:[[:space:]]*\\\"(.*)\\\",|\\1|' | paste -d  \"@\"  - -) && git tag $PACKAGE_ID && git push --tags"
   },
