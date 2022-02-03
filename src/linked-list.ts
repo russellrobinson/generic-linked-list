@@ -53,7 +53,8 @@ class DoubleLinkedListNode<T> extends LinkedListNode<T> {
  *  - insert at the beginning (unshift)
  *  - append to the end (push)
  *  - remove from the beginning (shift)
- * as these operations are O(1) for a linked list, but O(n) for the above array operations.
+ * as these operations are O(1) for a linked list, but O(n) for array shift and unshift.
+ * Note that a fast "pop" requires a doubly-linked list.
  */
 export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> {
   protected _root: LinkedListNode<T> | undefined;
