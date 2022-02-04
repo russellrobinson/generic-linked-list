@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Cooltrax Pty Limited
+ * Copyright (c) 2022 Russell Robinson <russellr@openconcepts.com.au>
  */
 
 import { expect } from 'chai';
@@ -49,6 +49,7 @@ describe('linked-list', () => {
         expect(list.length).to.equal(0);
         expect(list.shift()).to.be.undefined;
       });
+
     });
     describe('unshift', () => {
       it('returns the new length', () => {
@@ -68,6 +69,99 @@ describe('linked-list', () => {
         }
         expect(list.length).to.equal(0);
         expect(list.shift()).to.be.undefined;
+      });
+    });
+
+    describe('iteration', () => {
+      it('has an iterator interface', () => {
+        const count = 10_000;
+        const list = insertList(count);
+        let index = 0;
+
+        for (let value of list) {
+          expect(value).to.equal(index++);
+        }
+        expect(index).to.equal(count);
+      });
+      it('obeys the iterator protocol', () => {
+        const count = 10_000;
+        const list = insertList(count);
+        let it = list[Symbol.iterator]();
+        let next;
+        let index = 0;
+
+        do {
+          next = it.next();
+          if (!next.done) {
+            expect(next.value).to.equal(index++);
+          }
+        } while (!next.done);
+        expect(next.value).to.be.undefined;
+        expect(index).to.equal(count);
+      });
+      it('works with nested iterators', () => {
+        const count = 100;
+        const list = insertList(count);
+        let index = 0;
+
+        for (const value1 of list) {
+
+          expect(value1).to.equal(index++);
+          let position = index;
+          for (const value2 of list) {
+            if (--position === 0) {
+              expect(value2).to.equal(value1);
+            } else {
+              expect(value2).to.not.equal(value1);
+            }
+          }
+        }
+        expect(index).to.equal(count);
+      });
+      it('can convert to an array', () => {
+        const count = 10_000;
+        const list = insertList(count);
+        const arr = Array.from(list);
+
+        expect(arr.length).to.equal(count);
+        let index = 0;
+        for (const value of list) {
+          expect(value).to.equal(arr[index++]);
+        }
+        expect(index).to.equal(count);
+      });
+      it('works with the spread operator', () => {
+        const count = 10_000;
+        const list = insertList(count);
+        const arr = [...list];
+
+        expect(arr.length).to.equal(count);
+        let index = 0;
+        for (const value of list) {
+          expect(value).to.equal(arr[index++]);
+        }
+        expect(index).to.equal(count);
+      });
+      it('instantiates with an existing list', () => {
+        const count = 10_000;
+        const origList = appendList(count);
+        const dupList = new LinkedList<number>(origList);
+
+        expect(dupList.length).to.equal(origList.length);
+
+        let origIter = origList[Symbol.iterator]();
+        let dupIter = dupList[Symbol.iterator]();
+        let origNext;
+        let dupNext;
+
+        do {
+          origNext = origIter.next();
+          dupNext = dupIter.next();
+          expect(origNext.done).to.equal(dupNext.done);
+          if (!origNext.done) {
+            expect(origNext.value).to.equal(dupNext.value);
+          }
+        } while (!origNext.done && !dupNext.done);
       });
     });
 

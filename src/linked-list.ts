@@ -1,23 +1,35 @@
 /*
- * Copyright (c) 2022 Cooltrax Pty Limited
+ * Copyright (c) 2022 Russell Robinson <russellr@openconcepts.com.au>
  */
 
 /**
- * A node in a singly-linked list.
+ * A node in a singly-linked list that is only readable.
  */
-class LinkedListNode<T> {
-  private _value: T;
-  private _next: LinkedListNode<T> | undefined;
+class ReadonlyLinkedListNode<T> {
+  protected _value: Readonly<T>;
+  protected _next: ReadonlyLinkedListNode<T> | undefined;
 
   constructor(value: T) {
     this._value = value;
     this._next = undefined;
   }
 
-  get value(): T {
+  get value(): Readonly<T> {
     return this._value;
   }
 
+  get next(): ReadonlyLinkedListNode<T> | undefined {
+    return this._next;
+  }
+}
+
+/**
+ * A node in a singly-linked list.
+ */
+class LinkedListNode<T> extends ReadonlyLinkedListNode<T> {
+  /**
+   * Need to re-define because it won't get inherited.
+   */
   get next(): LinkedListNode<T> | undefined {
     return this._next;
   }
@@ -29,7 +41,7 @@ class LinkedListNode<T> {
 
 /**
  * A node in a doubly-linked list.
-class DoubleLinkedListNode<T> extends LinkedListNode<T> {
+ class DoubleLinkedListNode<T> extends LinkedListNode<T> {
   private _prev: DoubleLinkedListNode<T> | undefined;
 
   constructor(value: T) {
@@ -47,6 +59,26 @@ class DoubleLinkedListNode<T> extends LinkedListNode<T> {
 }
  */
 
+class ListIterator<T> {
+  protected _next: ReadonlyLinkedListNode<T> | undefined;
+
+  constructor(root: ReadonlyLinkedListNode<T> | undefined) {
+    this._next = root;
+  }
+
+  next(): IteratorResult<T> {
+    let result;
+
+    if (this._next !== undefined) {
+      result = {value: this._next.value};
+      this._next = this._next.next;
+    } else {
+      result = {done: true};
+    }
+    return result;
+  }
+}
+
 /**
  * Implementation of a simple generic singly-linked Linked List.
  * Ideal to replace large arrays where you:
@@ -56,14 +88,23 @@ class DoubleLinkedListNode<T> extends LinkedListNode<T> {
  * as these operations are O(1) for a linked list, but O(n) for array shift and unshift.
  * Note that a fast "pop" requires a doubly-linked list.
  */
-export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> {
-  protected _root: LinkedListNode<T> | undefined;
+export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> implements Iterable<T> {
+  private _root: LinkedListNode<T> | undefined;
   protected _end: LinkedListNode<T> | undefined;
   protected _length: number;
 
-  constructor() {
+  /**
+   * Construct the linked list, and optional initialise it via the given iterator.
+   * @param it
+   */
+  constructor(it?: Iterable<T>) {
     this._root = this._end = undefined;
     this._length = 0;
+    if (it !== undefined) {
+      for (const t of it) {
+        this.push(t);
+      }
+    }
   }
 
   protected _createNode(value: T): LinkedListNode<T> {
@@ -148,5 +189,9 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> {
    */
   get length(): number {
     return this._length;
+  }
+
+  [Symbol.iterator]() {
+    return new ListIterator<T>(this._root);
   }
 }
