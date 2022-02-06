@@ -173,9 +173,6 @@ describe('linked-list', () => {
         const list = new LinkedList<number>();
         const arr: number[] = [];
 
-        const x = new Array<Object>();
-
-        x.find(() => true);
         const count = list.unshift(1, 2, 3, 4);
         arr.unshift(1, 2, 3, 4);
 
@@ -349,54 +346,98 @@ describe('linked-list', () => {
       });
     });
 
-    describe('find', () => {
+    describe('indexOf', () => {
       it('finds a matching element just like Array', () => {
         const arr = [1, 2, 3, 4];
+        expect(arr.indexOf(2)).to.equal(1);
 
-        expect(arr.find(value => value === 2)).to.equal(2);
+        const list = new LinkedList<number>(arr);
+        expect(list.indexOf(2)).to.equal(1);
+      });
+      it('returns -1 with no matching element just like Array', () => {
+        const arr = [1, 2, 3, 4];
+        expect(arr.indexOf(5)).to.equal(-1);
+
+        const list = new LinkedList<number>(arr);
+        expect(list.indexOf(5)).to.equal(-1);
+      });
+      it('returns -1 with empty list just like Array', () => {
+        // noinspection JSMismatchedCollectionQueryUpdate
+        const arr: number[] = [];
+        expect(arr.indexOf(1)).to.equal(-1);
+
+        const list = new LinkedList<number>();
+        expect(list.indexOf(1)).to.equal(-1);
+      });
+      it('finds first matching only just like Array', () => {
+        const arr = [1, 2, 3, 4, 2];
+        expect(arr.indexOf(2)).to.equal(1);
+
+        const list = new LinkedList<number>(arr);
+        expect(list.indexOf(2)).to.equal(1);
+      });
+    });
+    describe('find & findIndex', () => {
+      it('finds a matching element just like Array', () => {
+        const arr = [1, 2, 3, 4];
+        const pred = value => value === 2;
+
+        expect(arr.find(pred)).to.equal(2);
+        expect(arr.findIndex(pred)).to.equal(1);
 
         const list = new LinkedList<number>(arr);
 
-        expect(list.find(value => value === 2)).to.equal(2);
+        expect(list.find(pred)).to.equal(2);
+        expect(list.findIndex(pred)).to.equal(1);
       });
       it('returns undefined with no matching element just like Array', () => {
         const arr = [1, 2, 3, 4];
+        const pred = value => value === 5;
 
-        expect(arr.find(value => value === 5)).to.be.undefined;
+        expect(arr.find(pred)).to.be.undefined;
+        expect(arr.findIndex(pred)).to.equal(-1);
 
         const list = new LinkedList<number>(arr);
 
-        expect(list.find(value => value === 5)).to.be.undefined;
+        expect(list.find(pred)).to.be.undefined;
+        expect(list.findIndex(pred)).to.equal(-1);
       });
       it('finds first matching only just like Array', () => {
         const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        const pred = value => value.a === 2;
 
-        expect(arr.find(value => value.a === 2)).to.deep.equal({a: 2, b: 2});
+        expect(arr.find(pred)).to.deep.equal({a: 2, b: 2});
+        expect(arr.findIndex(pred)).to.equal(1);
 
         const list = new LinkedList<Obj>(arr);
 
-        expect(list.find(value => value.a === 2)).to.deep.equal({a: 2, b: 2});
+        expect(list.find(pred)).to.deep.equal({a: 2, b: 2});
+        expect(list.findIndex(pred)).to.equal(1);
       });
       it('provides an index parameter to the predicate just like Array', () => {
         const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        const pred = (value, index) => value.a === 2 && index > 1;
 
-        expect(arr.find((value, index) => value.a === 2 && index > 1)).to.deep.equal({a: 2, b: 'x'});
+        expect(arr.find(pred)).to.deep.equal({a: 2, b: 'x'});
+        expect(arr.findIndex(pred)).to.equal(3);
 
         const list = new LinkedList<Obj>(arr);
 
-        expect(list.find((value, index) => value.a === 2 && index > 1)).to.deep.equal({a: 2, b: 'x'});
+        expect(list.find(pred)).to.deep.equal({a: 2, b: 'x'});
+        expect(list.findIndex(pred)).to.equal(3);
       });
       it('provides the list parameter to the predicate just like Array', () => {
         const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        const arrPred = (value, index, theArray) => value.a === 2 && theArray[index].b === 'x';
 
-        expect(arr.find((value, index, theArray) => value.a === 2 && theArray[index].b === 'x')).to.deep.equal({
+        expect(arr.find(arrPred)).to.deep.equal({
           a: 2,
           b: 'x'
         });
+        expect(arr.findIndex(arrPred)).to.equal(3);
 
         const list = new LinkedList<Obj>(arr);
-
-        expect(list.find((value, index, theList) => {
+        const listPred = (value, index, theList) => {
           let result = false;
 
           if (value.a === 2) {
@@ -406,7 +447,10 @@ describe('linked-list', () => {
             }
           }
           return result;
-        })).to.deep.equal({a: 2, b: 'x'});
+        };
+
+        expect(list.find(listPred)).to.deep.equal({a: 2, b: 'x'});
+        expect(list.findIndex(listPred)).to.equal(3);
       });
       it('assigns thisArg just like Array', () => {
         const myObj = new TestClass();
@@ -416,7 +460,9 @@ describe('linked-list', () => {
         }
 
         expect(myObj.arr.find(pred, myObj)).to.deep.equal({a: 2, b: 'x'});
+        expect(myObj.arr.findIndex(pred, myObj)).to.equal(3);
         expect(myObj.list.find(pred, myObj)).to.deep.equal({a: 2, b: 'x'});
+        expect(myObj.list.findIndex(pred, myObj)).to.equal(3);
 
         //
         // missing myObj results in an exception
@@ -428,11 +474,12 @@ describe('linked-list', () => {
     describe('filter', () => {
       it('filters to matching elements just like Array', () => {
         const arr = [1, 2, 3, 4, 2, 5, 2, 6, 2, 7];
+        const pred = value => value === 2;
 
-        expect(arr.filter(value => value === 2)).to.deep.equal([2, 2, 2, 2]);
+        expect(arr.filter(pred)).to.deep.equal([2, 2, 2, 2]);
 
         const list = new LinkedList<number>(arr);
-        const result = list.filter(value => value === 2);
+        const result = list.filter(pred);
 
         expect(result.length).to.equal(4);
         for (const value of result) {
@@ -441,20 +488,22 @@ describe('linked-list', () => {
       });
       it('returns empty list with no matching element just like Array', () => {
         const arr = [1, 2, 3, 4];
+        const pred = value => value === 5;
 
-        expect(arr.filter(value => value === 5).length).to.equal(0);
+        expect(arr.filter(pred).length).to.equal(0);
 
         const list = new LinkedList<number>(arr);
 
-        expect(list.filter(value => value === 5).length).to.equal(0);
+        expect(list.filter(pred).length).to.equal(0);
       });
       it('provides an index parameter to the predicate just like Array', () => {
         const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        const pred = (value, index) => value.a === 2 && index > 1;
 
-        expect(arr.filter((value, index) => value.a === 2 && index > 1)).to.deep.equal([{a: 2, b: 'x'}]);
+        expect(arr.filter(pred)).to.deep.equal([{a: 2, b: 'x'}]);
 
         const list = new LinkedList<Obj>(arr);
-        const result = list.filter((value, index) => value.a === 2 && index > 1);
+        const result = list.filter(pred);
         const expected = new LinkedList<Obj>([{a: 2, b: 'x'}]);
 
         expectEqual(result, expected);

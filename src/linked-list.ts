@@ -101,10 +101,10 @@ export type LinkedListPredicate<T> = (value: T, index: number, list: LinkedList<
 export type LinkedListCallback<T> = (value: T, index: number, list: LinkedList<T>) => void
 
 /**
- * Internal function type for processing each value in the list.
+ * Internal function type for processing a value in the list.
  * @returns true if the iteration is to continue, or false to terminate the iteration
  */
-type IterationFunction<T> = (value: T) => boolean;
+type IterationFunction<T> = (value: T, index: number) => boolean;
 
 /**
  * Implementation of a simple generic singly-linked Linked List.
@@ -248,7 +248,7 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
 
     for (const value of this) {
       if (callPredicate(value, index, this)) {
-        if (!action(value)) {
+        if (!action(value, index)) {
           break;
         }
       }
@@ -270,6 +270,41 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
       result = value;   // this is the return value
       return false;     // and stop the loop
     }, predicate, thisArg);
+
+    return result;
+  }
+
+  /**
+   * Find the first element in the list where the predicate function returns true and return the index of the element.
+   * Could be implemented by converting to an array first, and then calling the Array's method.
+   * This is faster.
+   * @param predicate
+   * @param thisArg
+   */
+  public findIndex(predicate: LinkedListPredicate<T>, thisArg?: any): number {
+    let result: number = -1;
+
+    this._iteratePredicate((value, index) => {
+      result = index;   // this is the return value
+      return false;     // and stop the loop
+    }, predicate, thisArg);
+
+    return result;
+  }
+
+  /**
+   * Find the first element in the list where the given value === the list value, and return the index.
+   * Could be implemented by converting to an array first, and then calling the Array's method.
+   * This is faster.
+   * @param testValue
+   */
+  public indexOf(testValue: T): number {
+    let result: number = -1;
+
+    this._iteratePredicate((value, index) => {
+      result = index;   // this is the return value
+      return false;     // and stop the loop
+    }, listValue => listValue === testValue);
 
     return result;
   }
@@ -326,8 +361,7 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
   }
 
   /* TODO
-   indexOf
-   lastIndexOf
+   lastIndexOf - probably only for DoublyLinkedList
    some
    map
    join
@@ -336,7 +370,6 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
    concat
    flat
    flatMap
-   at
    from
    reduce
    reduceRight
