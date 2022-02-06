@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.0.4] - 2022-02-04
+## [0.0.4] - 2022-02-06
 
 - Iterator is now an IterableIterator
 - Added new methods: at, forEach, finxIndex, indexOf
