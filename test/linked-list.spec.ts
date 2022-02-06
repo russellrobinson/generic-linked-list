@@ -8,6 +8,22 @@ import { LinkedList } from '../src/linked-list';
 
 describe('linked-list', () => {
   describe('LinkedList', () => {
+    function insertArray(count: number): number[] {
+      const list: number[] = [];
+      for (let ii = 0; ii < count; ii++) {
+        list.unshift(ii);
+      }
+      return list;
+    }
+
+    function appendArray(count: number): number[] {
+      const list: number[] = [];
+      for (let ii = 0; ii < count; ii++) {
+        list.push(ii);
+      }
+      return list;
+    }
+
     function appendList(count: number): LinkedList<number> {
       const list = new LinkedList<number>();
       for (let ii = 0; ii < count; ii++) {
@@ -24,11 +40,39 @@ describe('linked-list', () => {
       return list;
     }
 
-    it('instantiates', () => {
-      const list = new LinkedList<number>();
+    function expectEqual<T>(a: LinkedList<T>, b: LinkedList<T>): boolean {
+      let result = false;
 
-      expect(list.length).to.equal(0);
-      expect(list.shift()).to.be.undefined;
+      if (a.length === b.length) {
+        const aIter = a[Symbol.iterator]();
+        const bIter = b[Symbol.iterator]();
+        let aNext, bNext;
+
+        do {
+          aNext = aIter.next();
+          bNext = bIter.next();
+
+          expect(aNext).to.equal(bNext);
+        } while (aNext !== undefined && bNext !== undefined);
+      }
+      return result;
+    }
+
+    describe('instantiation', () => {
+      it('instantiates with no parameters', () => {
+        const list = new LinkedList<number>();
+
+        expect(list.length).to.equal(0);
+        expect(list.shift()).to.be.undefined;
+      });
+      it('instantiates with iterator', () => {
+        const list = new LinkedList<number>([1, 2, 3]);
+
+        expect(list.length).to.equal(3);
+        expect(list.shift()).to.equal(1);
+        expect(list.shift()).to.equal(2);
+        expect(list.shift()).to.equal(3);
+      });
     });
 
     describe('push', () => {
@@ -49,7 +93,30 @@ describe('linked-list', () => {
         expect(list.length).to.equal(0);
         expect(list.shift()).to.be.undefined;
       });
+      it('accepts multiple parameters', () => {
+        const list = new LinkedList<number>();
+        const arr: number[] = [];
 
+        const count = list.push(1, 2, 3, 4);
+        arr.push(1, 2, 3, 4);
+
+        expect(list.length).to.equal(count);
+        for (let ii = 0; ii < count; ii++) {
+          const listValue = list.shift();
+          const arrValue = arr.shift();
+          expect(listValue).to.equal(ii + 1);
+          expect(listValue).to.equal(arrValue);
+        }
+        expect(list.length).to.equal(0);
+        expect(list.shift()).to.be.undefined;
+      });
+      it('allows no parameters, just like Array', () => {
+        const arr: number[] = [];
+        const list = new LinkedList<number>();
+
+        expect(arr.push()).to.equal(0);
+        expect(list.push()).to.equal(0);
+      });
     });
     describe('unshift', () => {
       it('returns the new length', () => {
@@ -69,6 +136,33 @@ describe('linked-list', () => {
         }
         expect(list.length).to.equal(0);
         expect(list.shift()).to.be.undefined;
+      });
+      it('accepts multiple parameters', () => {
+        const list = new LinkedList<number>();
+        const arr: number[] = [];
+
+        const x = new Array<Object>();
+
+        x.find(() => true);
+        const count = list.unshift(1, 2, 3, 4);
+        arr.unshift(1, 2, 3, 4);
+
+        expect(list.length).to.equal(count);
+        for (let ii = 0; ii < count; ii++) {
+          const listValue = list.shift();
+          const arrValue = arr.shift();
+          expect(listValue).to.equal(ii + 1);
+          expect(listValue).to.equal(arrValue);
+        }
+        expect(list.length).to.equal(0);
+        expect(list.shift()).to.be.undefined;
+      });
+      it('allows no parameters, just like Array', () => {
+        const arr: number[] = [];
+        const list = new LinkedList<number>();
+
+        expect(arr.unshift()).to.equal(0);
+        expect(list.unshift()).to.equal(0);
       });
     });
 
@@ -99,16 +193,29 @@ describe('linked-list', () => {
         expect(next.value).to.be.undefined;
         expect(index).to.equal(count);
       });
-      it('works with nested iterators', () => {
+      it('provides an iterableiterator, just like Array', () => {
+        const count = 10_000;
+        const arr = appendArray(count);
+        const list = appendList(count);
+
+        const arrIter: IterableIterator<number> = arr[Symbol.iterator]();
+        const listIter: IterableIterator<number> = list[Symbol.iterator]();
+        //
+        // When you create an iterator from an iterator, this just duplicates the iterator.
+        // This seems illogical to me, but that's what it does in Array.
+        //
+        expect(arrIter[Symbol.iterator]()).to.equal(arrIter);
+        expect(listIter[Symbol.iterator]()).to.equal(listIter);
+      });
+      it('works with nested iterators, just like Array', () => {
         const count = 100;
-        const list = insertList(count);
+        const arr = appendArray(count);
         let index = 0;
 
-        for (const value1 of list) {
-
+        for (const value1 of arr) {
           expect(value1).to.equal(index++);
           let position = index;
-          for (const value2 of list) {
+          for (const value2 of arr) {
             if (--position === 0) {
               expect(value2).to.equal(value1);
             } else {
@@ -165,23 +272,246 @@ describe('linked-list', () => {
       });
     });
 
+    describe('values', () => {
+      it('works just like Array.values', () => {
+        const fixture: number[] = [1, 2, 3, 4];
+        const arr = new Array(...fixture);
+
+        function compare(iter: IterableIterator<number>) {
+          let index = 0;
+          for (const value of iter) {
+            expect(value).to.equal(fixture[index]);
+            index++;
+          }
+        }
+
+        compare(arr.values());
+
+        const list = new LinkedList<number>(arr);
+        compare(list.values());
+      });
+    });
+    describe('find', () => {
+      it('finds a matching element just like Array', () => {
+        const arr = [1, 2, 3, 4];
+
+        expect(arr.find(value => value === 2)).to.equal(2);
+
+        const list = new LinkedList<number>(arr);
+
+        expect(list.find(value => value === 2)).to.equal(2);
+      });
+      it('returns undefined with no matching element just like Array', () => {
+        const arr = [1, 2, 3, 4];
+
+        expect(arr.find(value => value === 5)).to.be.undefined;
+
+        const list = new LinkedList<number>(arr);
+
+        expect(list.find(value => value === 5)).to.be.undefined;
+      });
+      it('finds first matching only just like Array', () => {
+        type Obj = { a: number, b: number | string };
+        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+
+        expect(arr.find(value => value.a === 2)).to.deep.equal({a: 2, b: 2});
+
+        const list = new LinkedList<Obj>(arr);
+
+        expect(list.find(value => value.a === 2)).to.deep.equal({a: 2, b: 2});
+      });
+      it('provides a position parameter to the predicate just like Array', () => {
+        type Obj = { a: number, b: number | string };
+        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+
+        expect(arr.find((value, position) => value.a === 2 && position > 1)).to.deep.equal({a: 2, b: 'x'});
+
+        const list = new LinkedList<Obj>(arr);
+
+        expect(list.find((value, position) => value.a === 2 && position > 1)).to.deep.equal({a: 2, b: 'x'});
+      });
+      it('provides the list parameter to the predicate just like Array', () => {
+        type Obj = { a: number, b: number | string };
+        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+
+        expect(arr.find((value, position, theArray) => value.a === 2 && theArray[position].b === 'x')).to.deep.equal({
+          a: 2,
+          b: 'x'
+        });
+
+        const list = new LinkedList<Obj>(arr);
+
+        expect(list.find((value, position, theList) => {
+          let result = false;
+
+          if (value.a === 2) {
+            //
+            // iterate the list to the given position and check the value of b
+            //
+            let currPos = 0;
+            for (const testValue of theList) {
+              if (currPos === position) {
+                if (testValue.b === 'x') {
+                  result = true;
+                  break;
+                }
+              }
+              currPos++;
+            }
+          }
+          return result;
+        })).to.deep.equal({a: 2, b: 'x'});
+      });
+      it('assigns thisArg just like Array', () => {
+        type Obj = { a: number, b: number | string };
+
+        class TestClass {
+          private readonly _arr: Obj[];
+          private readonly _list: LinkedList<Obj>;
+
+          constructor() {
+            this._arr = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+            this._list = new LinkedList<Obj>(this._arr);
+          }
+
+          match(value: Obj, position: number): boolean {
+            return value.a === 2 && position > 1;
+          }
+
+          get arr(): Obj[] {
+            return this._arr;
+          }
+
+          get list(): LinkedList<Obj> {
+            return this._list;
+          }
+        }
+
+        const myObj = new TestClass();
+
+        function pred(this: TestClass, value, position) {
+          return this.match(value, position);
+        }
+
+        expect(myObj.arr.find(pred, myObj)).to.deep.equal({a: 2, b: 'x'});
+        expect(myObj.list.find(pred, myObj)).to.deep.equal({a: 2, b: 'x'});
+
+        //
+        // missing myObj results in an exception
+        //
+        expect(() => myObj.arr.find(pred)).to.throw();
+        expect(() => myObj.list.find(pred)).to.throw();
+      });
+    });
+    describe('filter', () => {
+      it('filters to matching elements just like Array', () => {
+        const arr = [1, 2, 3, 4, 2, 5, 2, 6, 2, 7];
+
+        expect(arr.filter(value => value === 2)).to.deep.equal([2, 2, 2, 2]);
+
+        const list = new LinkedList<number>(arr);
+        const result = list.filter(value => value === 2);
+
+        expect(result.length).to.equal(4);
+        for (const value of result) {
+          expect(value).to.equal(2);
+        }
+      });
+      it('returns empty list with no matching element just like Array', () => {
+        const arr = [1, 2, 3, 4];
+
+        expect(arr.filter(value => value === 5).length).to.equal(0);
+
+        const list = new LinkedList<number>(arr);
+
+        expect(list.filter(value => value === 5).length).to.equal(0);
+      });
+      it('provides a position parameter to the predicate just like Array', () => {
+        type Obj = { a: number, b: number | string };
+        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+
+        expect(arr.filter((value, position) => value.a === 2 && position > 1)).to.deep.equal([{a: 2, b: 'x'}]);
+
+        const list = new LinkedList<Obj>(arr);
+        const result = list.filter((value, position) => value.a === 2 && position > 1);
+
+        expectEqual(list, result);
+      });
+      xit('provides the list parameter to the predicate just like Array', () => {
+        type Obj = { a: number, b: number | string };
+        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+
+        expect(arr.find((value, position, theArray) => value.a === 2 && theArray[position].b === 'x')).to.deep.equal([{
+          a: 2,
+          b: 'x'
+        }]);
+
+        const list = new LinkedList<Obj>(arr);
+
+        expect(list.find((value, position, theList) => {
+          let result = false;
+
+          if (value.a === 2) {
+            //
+            // iterate the list to the given position and check the value of b
+            //
+            let currPos = 0;
+            for (const testValue of theList) {
+              if (currPos === position) {
+                if (testValue.b === 'x') {
+                  result = true;
+                  break;
+                }
+              }
+              currPos++;
+            }
+          }
+          return result;
+        })).to.deep.equal({a: 2, b: 'x'});
+      });
+      xit('assigns thisArg just like Array', () => {
+        type Obj = { a: number, b: number | string };
+
+        class TestClass {
+          private readonly _arr: Obj[];
+          private readonly _list: LinkedList<Obj>;
+
+          constructor() {
+            this._arr = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+            this._list = new LinkedList<Obj>(this._arr);
+          }
+
+          match(value: Obj, position: number): boolean {
+            return value.a === 2 && position > 1;
+          }
+
+          get arr(): Obj[] {
+            return this._arr;
+          }
+
+          get list(): LinkedList<Obj> {
+            return this._list;
+          }
+        }
+
+        const myObj = new TestClass();
+
+        function pred(this: TestClass, value, position) {
+          return this.match(value, position);
+        }
+
+        expect(myObj.arr.find(pred, myObj)).to.deep.equal({a: 2, b: 'x'});
+        expect(myObj.list.find(pred, myObj)).to.deep.equal({a: 2, b: 'x'});
+
+        //
+        // missing myObj results in an exception
+        //
+        expect(() => myObj.arr.find(pred)).to.throw();
+        expect(() => myObj.list.find(pred)).to.throw();
+      });
+    });
+
     describe('speed', () => {
-      function insertArray(count: number): number[] {
-        const list: number[] = [];
-        for (let ii = 0; ii < count; ii++) {
-          list.unshift(ii);
-        }
-        return list;
-      }
-
-      function appendArray(count: number): number[] {
-        const list: number[] = [];
-        for (let ii = 0; ii < count; ii++) {
-          list.push(ii);
-        }
-        return list;
-      }
-
       //
       // Linked list is much faster for unshift than array on large lengths
       //
