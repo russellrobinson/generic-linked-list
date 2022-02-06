@@ -369,6 +369,22 @@ describe('linked-list', () => {
         const list = new LinkedList<number>();
         expect(list.indexOf(1)).to.equal(-1);
       });
+      it('uses strict equality just like Array', () => {
+        //
+        // strict equality doesn't work with objects - they must be the same object
+        //
+        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        expect(arr.indexOf({a: 2, b: 2})).to.equal(-1);
+
+        const list = new LinkedList<Obj>(arr);
+        expect(list.indexOf({a: 2, b: 2})).to.equal(-1);
+
+        //
+        // So, now we test with the actual object, and it works
+        //
+        expect(arr.indexOf(arr[1])).to.equal(1);
+        expect(list.indexOf(arr[1])).to.equal(1);
+      });
       it('finds first matching only just like Array', () => {
         const arr = [1, 2, 3, 4, 2];
         expect(arr.indexOf(2)).to.equal(1);
