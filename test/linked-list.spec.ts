@@ -546,7 +546,7 @@ describe('linked-list', () => {
       //
       // Linked list is much faster for shift retrieval than the equivalent array with large lengths
       //
-      it('retrieves much faster than arrays', function () {
+      it('retrieves (shifts) much faster than arrays', function () {
         this.timeout(20_000);   // event loop is blocked, so this only affects the end
         const count = 200_000;
         const speedFactor = 300;   // much faster than this, but affected by coverage

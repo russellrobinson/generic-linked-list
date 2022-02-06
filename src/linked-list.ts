@@ -258,17 +258,13 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
    * @param thisArg
    */
   public find(predicate: LinkedListPredicate<T>, thisArg?: any): T | undefined {
-    const callPredicate = predicate.bind(thisArg);
     let result: T | undefined = undefined;
-    let index = 0;
 
-    for (const value of this) {
-      if (callPredicate(value, index, this)) {
-        result = value;
-        break;
-      }
-      index++;
-    }
+    this._iteratePredicate(value => {
+      result = value;   // this is the return value
+      return false;     // and stop the loop
+    }, predicate, thisArg);
+
     return result;
   }
 
@@ -280,16 +276,13 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
    * @param thisArg
    */
   public filter(predicate: LinkedListPredicate<T>, thisArg?: any): LinkedList<T> {
-    const callPredicate = predicate.bind(thisArg);
     const result = new LinkedList<T>();
-    let index = 0;
 
-    for (const value of this) {
-      if (callPredicate(value, index, this)) {
-        result.push(value);
-      }
-      index++;
-    }
+    this._iteratePredicate(value => {
+      result.push(value); // add this matched value to the result
+      return true;        // continue loop to end
+    }, predicate, thisArg);
+
     return result;
   }
 
