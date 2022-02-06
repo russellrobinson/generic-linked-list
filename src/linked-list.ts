@@ -95,6 +95,12 @@ class ListIterator<T> {
 export type LinkedListPredicate<T> = (value: T, index: number, list: LinkedList<T>) => boolean;
 
 /**
+ * The type for any callback function we support.
+ * Modelled after the callback function defined for Array.forEach.
+ */
+export type LinkedListCallback<T> = (value: T, index: number, list: LinkedList<T>) => void
+
+/**
  * Internal function type for processing each value in the list.
  * @returns true if the iteration is to continue, or false to terminate the iteration
  */
@@ -286,13 +292,45 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
     return result;
   }
 
+  /**
+   * Return the value at the given index in the list.
+   * Unlike Array, negative indexes are not supported and throw an exception.
+   * This is much slower than an array, but is still useful.
+   */
+  public at(index: number): T | undefined {
+    if (index < 0) {
+      throw Error('LinkedList.at method does not support negative numbers');
+    }
+    let result: T | undefined = undefined;
+
+    this._iteratePredicate(value => {
+      result = value;   // this is the value at the index
+      return false;     // terminate the loop
+    }, (value, loopIndex) => loopIndex === index);
+    return result;
+  }
+
+  /**
+   * Iterate over the elements calling the given function on each value.
+   * Unfortunately, lodash has a function for this, but it isn't generic enough to accept any iterator.
+   */
+  public forEach(callback: LinkedListCallback<T>, thisArg?: any): LinkedList<T> {
+    const callCallback = callback.bind(thisArg);
+    let index = 0;
+
+    for (const value of this) {
+      callCallback(value, index, this);
+      index++;
+    }
+    return this;
+  }
+
   /* TODO
    indexOf
    lastIndexOf
    some
    map
    join
-   forEach
    includes
    every
    concat

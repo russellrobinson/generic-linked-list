@@ -43,5 +43,6 @@
     ],
     "timeout": 0,
     "spec": "test/**/*.spec.ts"
-  }
+  },
+  "dependencies": {}
 }

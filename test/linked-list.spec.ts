@@ -323,6 +323,32 @@ describe('linked-list', () => {
         compare(list.values());
       });
     });
+
+    describe('at', () => {
+      it('works like Array.at (except for -ve indexes)', () => {
+        const fixture: number[] = [1, 2, 3, 4];
+        const arr = new Array(...fixture);
+
+        //
+        // Earlier versions of node do not support the Array.at method.
+        //
+        if (typeof arr.at === 'function') {
+          expect(arr.at(0)).to.equal(1);
+          expect(arr.at(3)).to.equal(4);
+          expect(arr.at(-1)).to.equal(4);
+          expect(arr.at(4)).to.be.undefined;
+        }
+
+        const list = new LinkedList<number>(fixture);
+
+        expect(list.at(0)).to.equal(1);
+        expect(list.at(3)).to.equal(4);
+        expect(list.at(4)).to.be.undefined;
+
+        expect(() => list.at(-1)).to.throw();
+      });
+    });
+
     describe('find', () => {
       it('finds a matching element just like Array', () => {
         const arr = [1, 2, 3, 4];
@@ -343,7 +369,6 @@ describe('linked-list', () => {
         expect(list.find(value => value === 5)).to.be.undefined;
       });
       it('finds first matching only just like Array', () => {
-        type Obj = { a: number, b: number | string };
         const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
 
         expect(arr.find(value => value.a === 2)).to.deep.equal({a: 2, b: 2});
@@ -353,7 +378,6 @@ describe('linked-list', () => {
         expect(list.find(value => value.a === 2)).to.deep.equal({a: 2, b: 2});
       });
       it('provides an index parameter to the predicate just like Array', () => {
-        type Obj = { a: number, b: number | string };
         const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
 
         expect(arr.find((value, index) => value.a === 2 && index > 1)).to.deep.equal({a: 2, b: 'x'});
@@ -363,7 +387,6 @@ describe('linked-list', () => {
         expect(list.find((value, index) => value.a === 2 && index > 1)).to.deep.equal({a: 2, b: 'x'});
       });
       it('provides the list parameter to the predicate just like Array', () => {
-        type Obj = { a: number, b: number | string };
         const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
 
         expect(arr.find((value, index, theArray) => value.a === 2 && theArray[index].b === 'x')).to.deep.equal({
@@ -377,18 +400,9 @@ describe('linked-list', () => {
           let result = false;
 
           if (value.a === 2) {
-            //
-            // iterate the list to the given index and check the value of b
-            //
-            let currPos = 0;
-            for (const testValue of theList) {
-              if (currPos === index) {
-                if (testValue.b === 'x') {
-                  result = true;
-                  break;
-                }
-              }
-              currPos++;
+            const testValue = theList.at(index);
+            if (testValue?.b === 'x') {
+              result = true;
             }
           }
           return result;
@@ -435,7 +449,6 @@ describe('linked-list', () => {
         expect(list.filter(value => value === 5).length).to.equal(0);
       });
       it('provides an index parameter to the predicate just like Array', () => {
-        type Obj = { a: number, b: number | string };
         const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
 
         expect(arr.filter((value, index) => value.a === 2 && index > 1)).to.deep.equal([{a: 2, b: 'x'}]);
@@ -447,7 +460,6 @@ describe('linked-list', () => {
         expectEqual(result, expected);
       });
       it('provides the list parameter to the predicate just like Array', () => {
-        type Obj = { a: number, b: number | string };
         const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
 
         expect(arr.filter((value, index, theArray) => value.a === 2 && theArray[index].b === 'x')).to.deep.equal([{
@@ -461,18 +473,9 @@ describe('linked-list', () => {
           let result = false;
 
           if (value.a === 2) {
-            //
-            // iterate the list to the given index and check the value of b
-            //
-            let currPos = 0;
-            for (const testValue of theList) {
-              if (currPos === index) {
-                if (testValue.b === 'x') {
-                  result = true;
-                  break;
-                }
-              }
-              currPos++;
+            const testValue = theList.at(index);
+            if (testValue?.b === 'x') {
+              result = true;
             }
           }
           return result;
@@ -498,6 +501,92 @@ describe('linked-list', () => {
         //
         expect(() => myObj.arr.find(pred)).to.throw();
         expect(() => myObj.list.find(pred)).to.throw();
+      });
+    });
+    describe('forEach', () => {
+      it('calls the callback on every element just like Array', () => {
+        const arr = [1, 2, 3, 4];
+        let result = 0;
+
+        function sum(value) {
+          result += value;
+        }
+
+        arr.forEach(sum);
+        expect(result).to.equal(10);
+
+        const list = new LinkedList<number>(arr);
+        result = 0;
+        list.forEach(sum);
+        expect(result).to.equal(10);
+      });
+      it('does nothing on an empty list, just like Array', () => {
+        const arr = [];
+        let result = true;
+
+        function cb() {
+          result = false;
+        }
+
+        arr.forEach(cb);
+        expect(result).to.be.true;
+
+        const list = new LinkedList<number>(arr);
+
+        list.forEach(cb);
+        expect(result).to.be.true;
+      });
+      it('provides an index parameter to the callback, just like Array', () => {
+        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        let result = -1;
+
+        arr.forEach((value, index) => result = index);
+        expect(result).to.equal(3);
+
+        const list = new LinkedList<Obj>(arr);
+
+        result = -1;
+        list.forEach((value, index) => result = index);
+        expect(result).to.equal(3);
+      });
+      it('provides the list parameter to the predicate just like Array', () => {
+        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        let result: number | string = -1;
+
+        arr.forEach((value, index, theArray) => result = theArray[index].b);
+        expect(result).to.equal('x');
+
+        const list = new LinkedList<Obj>(arr);
+        result = -1;
+        list.forEach((value, index, theList) => {
+          const indexValue = theList.at(index);
+
+          if (indexValue !== undefined) {
+            result = indexValue?.b;
+          }
+        });
+        expect(result).to.equal('x');
+      });
+      it('assigns thisArg just like Array', () => {
+        const myObj = new TestClass();
+        let result: number | string = -1;
+
+        function arrCb(this: TestClass, value, index) {
+          result = this.arr[index].b;
+        }
+
+        myObj.arr.forEach(arrCb, myObj);
+        expect(result).to.equal('x');
+
+        function listCb(this: TestClass, value, index) {
+          const indexValue = this.list.at(index);
+          if (indexValue !== undefined) {
+            result = indexValue.b;
+          }
+        }
+
+        myObj.list.forEach(listCb, myObj);
+        expect(result).to.equal('x');
       });
     });
 
