@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.4] - 2022-02-04
+
+- Iterator is now an IterableIterator
+- Added new methods: at, forEach, finxIndex, indexOf
+- Some refactoring.
+
 ## [0.0.3] - 2022-02-04
 
 - Added `package.json` scripts to run tests with and without coverage.
