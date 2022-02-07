@@ -237,20 +237,26 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
 
   /**
    * Perform the given action on each value of the list provided the predicate function returns true.
-   * @param action      the action to perform; a return value of false terminates the iteration
+   * @param action      the action to perform if the predicate is true; a return value of false terminates the iteration
    * @param predicate   a function whose return value determines whether to perform the action
    * @param thisArg     optional "this" value to bind to the predicate
+   * @param falseAction the action to perform if the predicate is false; a return value of false terminates the iteration
    * @protected
    */
-  protected _iteratePredicate(action: IterationFunction<T>, predicate: LinkedListPredicate<T>, thisArg?: any): void {
+  protected _iteratePredicate(action: IterationFunction<T>, predicate: LinkedListPredicate<T>, thisArg?: any, falseAction?: IterationFunction<T>): void {
     const callPredicate = predicate.bind(thisArg);
     let index = 0;
 
     for (const value of this) {
+      let callAction: IterationFunction<T> = () => true;
+
       if (callPredicate(value, index, this)) {
-        if (!action(value, index)) {
-          break;
-        }
+        callAction = action;
+      } else if (falseAction !== undefined) {
+        callAction = falseAction;
+      }
+      if (!callAction(value, index)) {
+        break;
       }
       index++;
     }
@@ -360,13 +366,56 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
     return this;
   }
 
+  /**
+   * Test if each element of the list returns true for the given predicate function .
+   * Could be implemented by converting to an array first, and then calling the Array's method.
+   * This is faster.
+   * @param predicate
+   * @param thisArg
+   */
+  public every(predicate: LinkedListPredicate<T>, thisArg?: any): boolean {
+    let result: boolean = true;       // return true on an empty list
+
+    this._iteratePredicate(value => {
+        result = true;      // predicate is true, so we keep being true
+        return true;        // continue loop to end
+      },
+      predicate,
+      thisArg,
+      () => {
+        result = false; // predicate is fails, so we fail with false
+        return false;   // stop looping, since we have the result
+      });
+
+    return result;
+  }
+
+  /**
+   * Test if at least one element of the list returns true for the given predicate function .
+   * Could be implemented by converting to an array first, and then calling the Array's method.
+   * This is faster.
+   * @param predicate
+   * @param thisArg
+   */
+  public some(predicate: LinkedListPredicate<T>, thisArg?: any): boolean {
+    let result: boolean = false;       // return false on an empty list
+
+    this._iteratePredicate(value => {
+        result = true;      // predicate is true, so the resut is true
+        return false;        // stop looping, since we have the result
+      },
+      predicate,
+      thisArg);
+
+    return result;
+  }
+
+
   /* TODO
    lastIndexOf - probably only for DoublyLinkedList
-   some
    map
    join
    includes
-   every
    concat
    flat
    flatMap

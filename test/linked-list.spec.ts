@@ -5,6 +5,7 @@
 import { expect } from 'chai';
 import { hrtime } from 'process';
 import { LinkedList } from '../src/linked-list';
+import * as _ from 'lodash';
 
 describe('linked-list', () => {
   describe('LinkedList', () => {
@@ -79,6 +80,14 @@ describe('linked-list', () => {
 
       match(value: Obj, index: number): boolean {
         return value.a === 2 && index > 1;
+      }
+
+      matchAll(value: Obj, index: number): boolean {
+        return _.isNumber(value.b) || index === 3;
+      }
+
+      matchSome(value: Obj, index: number): boolean {
+        return value.a === 2
       }
 
       get arr(): Obj[] {
@@ -566,6 +575,137 @@ describe('linked-list', () => {
         //
         expect(() => myObj.arr.find(pred)).to.throw();
         expect(() => myObj.list.find(pred)).to.throw();
+      });
+    });
+    describe('every', () => {
+      it('returns true if every element matches the predicate, just like Array', () => {
+        const arr = [1, 2, 3, 4];
+        const pred = value => value < 5;
+
+        expect(arr.every(pred)).to.be.true;
+
+        const list = new LinkedList<number>(arr);
+        expect(list.every(pred)).to.be.true;
+      });
+      it('returns false if one element does not match the predicate, just like Array', () => {
+        const arr = [1, 2, 3, 4];
+        const pred = value => value === 1;
+
+        expect(arr.every(pred)).to.be.false;
+
+        const list = new LinkedList<number>(arr);
+        expect(list.every(pred)).to.be.false;
+      });
+      it('returns true on empty list just like Array', () => {
+        const arr = [];
+        const pred = value => value === 5;
+
+        expect(arr.every(pred)).to.be.true;
+
+        const list = new LinkedList<number>(arr);
+        expect(list.every(pred)).to.be.true;
+
+      });
+      it('provides an index parameter to the predicate just like Array', () => {
+        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        const pred = (value, index) => _.isNumber(value.b) || index === 3;
+
+        expect(arr.every(pred)).to.be.true;
+
+        const list = new LinkedList<Obj>(arr);
+        expect(list.every(pred)).to.be.true;
+      });
+      it('provides the list parameter to the predicate just like Array', () => {
+        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        const arrPred = (value, index, theArray) => _.isNumber(theArray[index].b) || theArray[index].b === 'x';
+
+        expect(arr.every(arrPred)).to.be.true;
+
+        const list = new LinkedList<Obj>(arr);
+        const listPred = (value, index, theList) => _.isNumber(theList.at(index).b) || theList.at(index).b === 'x';
+        expect(list.every(listPred)).to.be.true;
+      });
+      it('assigns thisArg just like Array', () => {
+        const myObj = new TestClass();
+
+        function pred(this: TestClass, value, index) {
+          return this.matchAll(value, index);
+        }
+
+        expect(myObj.arr.every(pred, myObj)).to.be.true;
+        expect(myObj.list.every(pred, myObj)).to.be.true;
+
+        //
+        // missing myObj results in an exception
+        //
+        expect(() => myObj.arr.every(pred)).to.throw();
+        expect(() => myObj.list.every(pred)).to.throw();
+      });
+    });
+    describe('some', () => {
+      it('returns true if an element matches the predicate, just like Array', () => {
+        const arr = [1, 2, 3, 4];
+        const pred = value => value == 3;
+
+        expect(arr.some(pred)).to.be.true;
+
+        const list = new LinkedList<number>(arr);
+        expect(list.some(pred)).to.be.true;
+      });
+      it('returns false if no element matches the predicate, just like Array', () => {
+        const arr = [1, 2, 3, 4];
+        const pred = value => value === 5;
+
+        expect(arr.some(pred)).to.be.false;
+
+        const list = new LinkedList<number>(arr);
+        expect(list.some(pred)).to.be.false;
+      });
+      it('returns false on empty list just like Array', () => {
+        const arr = [];
+        const pred = value => value === 5;
+
+        expect(arr.some(pred)).to.be.false;
+
+        const list = new LinkedList<number>(arr);
+        expect(list.some(pred)).to.be.false;
+
+      });
+      it('provides an index parameter to the predicate just like Array', () => {
+        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        const pred = (value, index) => index === 2;
+
+        expect(arr.some(pred)).to.be.true;
+
+        const list = new LinkedList<Obj>(arr);
+        expect(list.some(pred)).to.be.true;
+      });
+      it('provides the list parameter to the predicate just like Array', () => {
+        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        const arrPred = (value, index, theArray) => _.isNumber(theArray[index].b) || theArray[index].b === 'x';
+
+        expect(arr.some(arrPred)).to.be.true;
+
+        const list = new LinkedList<Obj>(arr);
+        const listPred = (value, index, theList) => _.isNumber(theList.at(index).b) || theList.at(index).b === 'x';
+        expect(list.some(listPred)).to.be.true;
+      });
+      it('assigns thisArg just like Array', () => {
+        const myObj = new TestClass();
+
+        function pred(this: TestClass, value, index) {
+          return this.matchSome(value, index);
+        }
+
+        expect(myObj.arr.some(pred, myObj)).to.be.true;
+
+        expect(myObj.list.some(pred, myObj)).to.be.true;
+
+        //
+        // missing myObj results in an exception
+        //
+        expect(() => myObj.arr.some(pred)).to.throw();
+        expect(() => myObj.list.some(pred)).to.throw();
       });
     });
     describe('forEach', () => {
