@@ -187,7 +187,7 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
 
   /**
    * Remove the first element from the list.
-   * @returns the new length of the list
+   * @returns the element removed from the front of the list, or undefined if the list is empty
    */
   public shift(): T | undefined {
     let result: T | undefined = undefined;
