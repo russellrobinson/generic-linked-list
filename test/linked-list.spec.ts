@@ -86,8 +86,8 @@ describe('linked-list', () => {
         return _.isNumber(value.b) || index === 3;
       }
 
-      matchSome(value: Obj, index: number): boolean {
-        return value.a === 2
+      matchSome(value: Obj): boolean {
+        return value.a === 2;
       }
 
       get arr(): Obj[] {
@@ -402,6 +402,74 @@ describe('linked-list', () => {
         expect(list.indexOf(2)).to.equal(1);
       });
     });
+    describe('includes', () => {
+      it('finds a matching element just like Array', () => {
+        const arr = [1, 2, 3, 4];
+        expect(arr.includes(2)).to.true;
+
+        const list = new LinkedList<number>(arr);
+        expect(list.includes(2)).to.true;
+      });
+      it('returns false with no matching element just like Array', () => {
+        const arr = [1, 2, 3, 4];
+        expect(arr.includes(5)).to.false;
+
+        const list = new LinkedList<number>(arr);
+        expect(list.includes(5)).to.false;
+      });
+      it('returns false with empty list just like Array', () => {
+        // noinspection JSMismatchedCollectionQueryUpdate
+        const arr: number[] = [];
+        expect(arr.includes(1)).to.false;
+
+        const list = new LinkedList<number>();
+        expect(list.includes(1)).to.false;
+      });
+      it('uses strict equality just like Array', () => {
+        //
+        // strict equality doesn't work with objects - they must be the same object
+        //
+        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        expect(arr.includes({a: 2, b: 2})).to.false;
+
+        const list = new LinkedList<Obj>(arr);
+        expect(list.includes({a: 2, b: 2})).to.false;
+
+        //
+        // So, now we test with the actual object, and it works
+        //
+        expect(arr.includes(arr[1])).to.true;
+        expect(list.includes(arr[1])).to.true;
+      });
+      it('finds NaN just like Array', () => {
+        const arr = [1, NaN, 3, 4, 2];
+        expect(arr.includes(NaN)).to.true;
+
+        const list = new LinkedList<number>(arr);
+        expect(list.includes(NaN)).to.true;
+      });
+      it('finds no NaN just like Array', () => {
+        const arr = [1, 3, 4, 2];
+        expect(arr.includes(NaN)).to.false;
+
+        const list = new LinkedList<number>(arr);
+        expect(list.includes(NaN)).to.false;
+      });
+      it('finds undefined just like Array', () => {
+        const arr = [1, undefined, 3, 4, 2];
+        expect(arr.includes(undefined)).to.true;
+
+        const list = new LinkedList<unknown>(arr);
+        expect(list.includes(undefined)).to.true;
+      });
+      it('finds null just like Array', () => {
+        const arr = [1, null, 3, 4, 2];
+        expect(arr.includes(null)).to.true;
+
+        const list = new LinkedList<unknown>(arr);
+        expect(list.includes(null)).to.true;
+      });
+    });
     describe('find & findIndex', () => {
       it('finds a matching element just like Array', () => {
         const arr = [1, 2, 3, 4];
@@ -693,8 +761,8 @@ describe('linked-list', () => {
       it('assigns thisArg just like Array', () => {
         const myObj = new TestClass();
 
-        function pred(this: TestClass, value, index) {
-          return this.matchSome(value, index);
+        function pred(this: TestClass, value) {
+          return this.matchSome(value);
         }
 
         expect(myObj.arr.some(pred, myObj)).to.be.true;

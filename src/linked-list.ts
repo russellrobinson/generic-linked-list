@@ -316,6 +316,39 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
   }
 
   /**
+   * Implementts the sameValueZero algorithm described here:
+   *  - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Equality_comparisons_and_sameness#abstract_equality_strict_equality_and_same_value_in_the_specification
+   *  - https://262.ecma-international.org/5.1/#sec-9.12
+   */
+  public static sameValueZero(lhs: unknown, rhs: unknown): boolean {
+    let result = lhs === rhs;
+
+    if (!result) {
+      if (Number.isNaN(lhs) && Number.isNaN(rhs)) {
+        result = true;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Test if the list contains the given value, ujsing the sameValueZero algorithm for comparison.
+   * Could be implemented by converting to an array first, and then calling the Array's method.
+   * This is faster.
+   * @param testValue
+   */
+  public includes(testValue: T): boolean {
+    let result = false;
+
+    this._iteratePredicate(() => {
+      result = true;   // this is the return value
+      return false;     // and stop the loop
+    }, listValue => LinkedList.sameValueZero(listValue,testValue));
+
+    return result;
+  }
+
+  /**
    * Filter the list and return a new list with the elements for which the predicate function returns true.
    * Could be implemented by converting to an array first, and then calling the Array's method.
    * This is faster.
@@ -376,7 +409,7 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
   public every(predicate: LinkedListPredicate<T>, thisArg?: any): boolean {
     let result: boolean = true;       // return true on an empty list
 
-    this._iteratePredicate(value => {
+    this._iteratePredicate(() => {
         result = true;      // predicate is true, so we keep being true
         return true;        // continue loop to end
       },
@@ -400,7 +433,7 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
   public some(predicate: LinkedListPredicate<T>, thisArg?: any): boolean {
     let result: boolean = false;       // return false on an empty list
 
-    this._iteratePredicate(value => {
+    this._iteratePredicate(() => {
         result = true;      // predicate is true, so the resut is true
         return false;        // stop looping, since we have the result
       },
