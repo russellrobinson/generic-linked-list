@@ -24,7 +24,7 @@ class ReadonlyLinkedListNode<T> {
 }
 
 /**
- * A node in a singly-linked list.
+ * A node in a singly-linked list, whose link can be changed.
  */
 class LinkedListNode<T> extends ReadonlyLinkedListNode<T> {
   /**
@@ -107,12 +107,21 @@ export type LinkedListCallback<T> = (value: T, index: number, list: LinkedList<T
 type IterationFunction<T> = (value: T, index: number) => boolean;
 
 /**
+ * Get the type of T for a LinkedList.
+ * See: https://stackoverflow.com/questions/18215899/get-type-of-generic-parameter
+ * However, it only works if you can create an instance of T, and there's no way to achieve that.
+ */
+// type GetLinkedListT<C extends LinkedList<unknown>> = C extends LinkedList<infer T> ? T : unknown;
+
+/**
  * Implementation of a simple generic singly-linked Linked List.
  * Ideal to replace large arrays where you:
  *  - insert at the beginning (unshift)
  *  - append to the end (push)
  *  - remove from the beginning (shift)
  * as these operations are O(1) for a linked list, but O(n) for array shift and unshift.
+ * Unit tests show 3 orders of magnitude speed increase over Array, which is significant for
+ * arrays with tens-of-thousands of elements or more.
  * Note that a fast "pop" requires a doubly-linked list.
  */
 export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> implements Iterable<T> {
@@ -122,7 +131,7 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
 
   /**
    * Construct the linked list, and optional initialise it via the given iterator.
-   * @param it
+   * @param it    any iterable of T's with which you want to initialise the list
    */
   constructor(it?: Iterable<T>) {
     this._root = this._end = undefined;
@@ -134,13 +143,18 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
     }
   }
 
+  /**
+   * Create a node or element in the linked list
+   * @param value   the value at the element
+   * @protected
+   */
   protected _createNode(value: T): LinkedListNode<T> {
     return new LinkedListNode<T>(value);
   }
 
   /**
    * Append to the end of a list
-   * @param valueList
+   * @param valueList a set of values to append to the list
    * @returns the new length of the list
    */
   public push(...valueList: T[]): number {
@@ -216,6 +230,7 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
 
   /**
    * Get the length of the list.
+   * @returns the length of the list
    */
   get length(): number {
     return this._length;
@@ -229,7 +244,18 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
   }
 
   /**
+   * Test if the given value is a LinkedList<T>.  Note that the <T> cannot be checked in Typescript
+   * and you must rely on other Typescript techniques to confirm matching types for the elements.
+   * @param maybeList   the value to test
+   * @returns true if the value is a LinkedList
+   */
+  public static isLinkedList<T>(maybeList: unknown): maybeList is LinkedList<T> {
+    return maybeList instanceof LinkedList;
+  }
+
+  /**
    * The values of the list (just an iterator).
+   * @returns an iterator for the list
    */
   public values(): ListIterator<T> {
     return new ListIterator<T>(this._root);
@@ -266,8 +292,8 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
    * Find the first element in the list where the predicate function returns true.
    * Could be implemented by converting to an array first, and then calling the Array's method.
    * This is faster.
-   * @param predicate
-   * @param thisArg
+   * @param predicate a function to test each element in the list
+   * @param thisArg   a "this" value to bind to the predicate function
    */
   public find(predicate: LinkedListPredicate<T>, thisArg?: any): T | undefined {
     let result: T | undefined = undefined;
@@ -284,8 +310,8 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
    * Find the first element in the list where the predicate function returns true and return the index of the element.
    * Could be implemented by converting to an array first, and then calling the Array's method.
    * This is faster.
-   * @param predicate
-   * @param thisArg
+   * @param predicate a function to test each element in the list
+   * @param thisArg   a "this" value to bind to the predicate function
    */
   public findIndex(predicate: LinkedListPredicate<T>, thisArg?: any): number {
     let result: number = -1;
@@ -302,7 +328,8 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
    * Find the first element in the list where the given value === the list value, and return the index.
    * Could be implemented by converting to an array first, and then calling the Array's method.
    * This is faster.
-   * @param testValue
+   * @param testValue   the value to find in the list
+   * @returns the index of the first list element that is === to testValue, or -1 if no such list element is found
    */
   public indexOf(testValue: T): number {
     let result: number = -1;
@@ -316,9 +343,12 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
   }
 
   /**
-   * Implementts the sameValueZero algorithm described here:
+   * Implements the sameValueZero algorithm described here:
    *  - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Equality_comparisons_and_sameness#abstract_equality_strict_equality_and_same_value_in_the_specification
    *  - https://262.ecma-international.org/5.1/#sec-9.12
+   * @param lhs   the left hand side of the equality test
+   * @param rhs   the left hand side of the equality test
+   * @returns true if lhs and rhs have the same value as defined by the sameValueZero algorithm
    */
   public static sameValueZero(lhs: unknown, rhs: unknown): boolean {
     let result = lhs === rhs;
@@ -335,7 +365,8 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
    * Test if the list contains the given value, ujsing the sameValueZero algorithm for comparison.
    * Could be implemented by converting to an array first, and then calling the Array's method.
    * This is faster.
-   * @param testValue
+   * @param testValue the value to look for in the list
+   * @returns true if the list includes the given value
    */
   public includes(testValue: T): boolean {
     let result = false;
@@ -343,7 +374,7 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
     this._iteratePredicate(() => {
       result = true;   // this is the return value
       return false;     // and stop the loop
-    }, listValue => LinkedList.sameValueZero(listValue,testValue));
+    }, listValue => LinkedList.sameValueZero(listValue, testValue));
 
     return result;
   }
@@ -352,8 +383,9 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
    * Filter the list and return a new list with the elements for which the predicate function returns true.
    * Could be implemented by converting to an array first, and then calling the Array's method.
    * This is faster.
-   * @param predicate
-   * @param thisArg
+   * @param predicate   a function to test each element in the list
+   * @param thisArg     a "this" value to bind to the predicate function
+   * @returns a new linked list with the just the elements that satisfied the predicate
    */
   public filter(predicate: LinkedListPredicate<T>, thisArg?: any): LinkedList<T> {
     const result = new LinkedList<T>();
@@ -370,6 +402,7 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
    * Return the value at the given index in the list.
    * Unlike Array, negative indexes are not supported and throw an exception.
    * This is much slower than an array, but is still useful.
+   * @returns the element at the given index or undefined
    */
   public at(index: number): T | undefined {
     if (index < 0) {
@@ -387,6 +420,9 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
   /**
    * Iterate over the elements calling the given function on each value.
    * Unfortunately, lodash has a function for this, but it isn't generic enough to accept any iterator.
+   * @param callback    a function to call for each element in the list
+   * @param thisArg     a "this" value to bind to the callback function
+   * @returns the linked list itself
    */
   public forEach(callback: LinkedListCallback<T>, thisArg?: any): LinkedList<T> {
     const callCallback = callback.bind(thisArg);
@@ -403,8 +439,9 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
    * Test if each element of the list returns true for the given predicate function .
    * Could be implemented by converting to an array first, and then calling the Array's method.
    * This is faster.
-   * @param predicate
-   * @param thisArg
+   * @param predicate   a function to test each element in the list
+   * @param thisArg     a "this" value to bind to the predicate function
+   * @returns true if all elements obey the predicate, otherwise false
    */
   public every(predicate: LinkedListPredicate<T>, thisArg?: any): boolean {
     let result: boolean = true;       // return true on an empty list
@@ -427,8 +464,9 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
    * Test if at least one element of the list returns true for the given predicate function .
    * Could be implemented by converting to an array first, and then calling the Array's method.
    * This is faster.
-   * @param predicate
-   * @param thisArg
+   * @param predicate   a function to test each element in the list
+   * @param thisArg     a "this" value to bind to the predicate function
+   * @returns true if at least one element obeys the predicate, otherwise false
    */
   public some(predicate: LinkedListPredicate<T>, thisArg?: any): boolean {
     let result: boolean = false;       // return false on an empty list
@@ -443,13 +481,31 @@ export class LinkedList<T, N extends LinkedListNode<T> = LinkedListNode<T>> impl
     return result;
   }
 
+  /**
+   * Concatenate values onto the end of the list.
+   * Unfortunately, lodash has a function for this, but it isn't generic enough to accept any iterator.
+   * @param values options values to concatenate; each value can be a T or a LinkedList<T>
+   * @returns a new list
+   */
+  public concat(...values: (T | LinkedList<T>)[]): LinkedList<T> {
+    let result: LinkedList<T> = new LinkedList<T>(this);
+
+    values.forEach(value => {
+      if (LinkedList.isLinkedList<T>(value)) {
+        for (const elem of value) {
+          result.push(elem as T);
+        }
+      } else {
+        result.push(value as T);
+      }
+    });
+    return result;
+  }
 
   /* TODO
    lastIndexOf - probably only for DoublyLinkedList
    map
    join
-   includes
-   concat
    flat
    flatMap
    from

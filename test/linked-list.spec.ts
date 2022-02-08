@@ -115,6 +115,15 @@ describe('linked-list', () => {
         expect(list.shift()).to.equal(3);
       });
     });
+    describe('isLinkedList', () => {
+      it('detects LinkedList', () => {
+        const list1 = new LinkedList<number>();
+
+        expect(LinkedList.isLinkedList(list1)).to.be.true;
+        expect(LinkedList.isLinkedList(4)).to.be.false;
+        expect(LinkedList.isLinkedList([])).to.be.false;
+      });
+    });
 
     describe('push', () => {
       it('returns the new length', () => {
@@ -400,6 +409,112 @@ describe('linked-list', () => {
 
         const list = new LinkedList<number>(arr);
         expect(list.indexOf(2)).to.equal(1);
+      });
+    });
+    describe('concat', () => {
+      it('concatenates just like Array', () => {
+        const arr = [1, 2, 3, 4];
+        const arrResult = arr.concat(2);
+        const arrExpected = [1, 2, 3, 4, 2];
+        expect(arrResult).to.deep.equal(arrExpected);
+
+        const list = new LinkedList<number>(arr);
+        const listResult = list.concat(2);
+        const listExpected = new LinkedList<number>(arrExpected);
+
+        expectEqual(listResult, listExpected);
+      });
+      it('accepts no parameters just like Array', () => {
+        const arr = [1, 2, 3, 4];
+        const arrResult = arr.concat();
+        const arrExpected = [1, 2, 3, 4];
+        expect(arrResult).to.deep.equal(arrExpected);
+
+        const list = new LinkedList<number>(arr);
+        const listResult = list.concat();
+        const listExpected = new LinkedList<number>(arrExpected);
+
+        expectEqual(listResult, listExpected);
+      });
+      it('accepts multiple parameters just like Array', () => {
+        const arr = [1, 2, 3, 4];
+        const arrResult = arr.concat(5, 2, 1, NaN);
+        const arrExpected = [1, 2, 3, 4, 5, 2, 1, NaN];
+        expect(arrResult).to.deep.equal(arrExpected);
+
+        const list = new LinkedList<number>(arr);
+        const listResult = list.concat(5, 2, 1, NaN);
+        const listExpected = new LinkedList<number>(arrExpected);
+
+        expectEqual(listResult, listExpected);
+      });
+      it('accepts list parameters just like Array accepts arrays', () => {
+        const arr = [1, 2, 3, 4];
+        const arrResult = arr.concat(5, [2, 3], 1, [NaN, 0]);
+        const arrExpected = [1, 2, 3, 4, 5, 2, 3, 1, NaN, 0];
+        expect(arrResult).to.deep.equal(arrExpected);
+
+        const list = new LinkedList<number>(arr);
+        const listResult = list.concat(5, new LinkedList([2, 3]), 1, new LinkedList([NaN, 0]));
+        const listExpected = new LinkedList<number>(arrExpected);
+
+        expectEqual(listResult, listExpected);
+      });
+      it('performs shallow copy just like Array', () => {
+        type LocalObj = Obj & { c?: { c1: number, c2: string } };      // extend Obj for this test
+        const constObj1: LocalObj = {a: 1, b: 2, c: {c1: 1, c2: 'xx'}};
+        let obj1: LocalObj = constObj1;
+        const obj2: LocalObj = {a: 2, b: 2};
+        const sameObj2Value: LocalObj = {a: 2, b: 2};
+        const arr: LocalObj[] = [obj1, obj2];
+
+        //
+        // Establish what === does...
+        //
+        expect(arr[0] === obj1).to.be.true;
+        expect(arr[0]).to.deep.equal(obj1);         // of course, because ===
+        expect(arr[1] === obj2).to.be.true;
+        expect(arr[1] === sameObj2Value).to.be.false;
+
+        //
+        // Array concat
+        //
+        const arrResult = arr.concat(obj1, obj2);
+        expect(arrResult[2] === obj1).to.be.true;
+        expect(arrResult[2]).to.deep.equal(obj1);         // of course, because ===
+        expect(arrResult[2] === arrResult[0]).to.be.true;
+        expect(arrResult[3] === obj2).to.be.true;
+        expect(arrResult[3] === arrResult[1]).to.be.true;
+        expect(arrResult[4] === sameObj2Value).to.be.false;
+
+        //
+        // Build and check list
+        //
+        const list: LinkedList<LocalObj> = new LinkedList<LocalObj>(arr);
+        expect(list.at(0) === obj1).to.be.true;
+        expect(list.at(0)).to.deep.equal(obj1);         // of course, because ===
+        expect(list.at(1) === obj2).to.be.true;
+        expect(list.at(1) === sameObj2Value).to.be.false;
+
+        //
+        // Concatenate and check
+        //
+        const listResult = list.concat(obj1, obj2);
+        expect(listResult.at(2) === obj1).to.be.true;
+        expect(listResult.at(2)).to.deep.equal(obj1);         // of course, because ===
+        expect(listResult.at(2) === listResult.at(0)).to.be.true;
+        expect(listResult.at(3) === obj2).to.be.true;
+        expect(listResult.at(3) === listResult.at(1)).to.be.true;
+        expect(listResult.at(4) === sameObj2Value).to.be.false;
+
+        //
+        // Now change underlying object and confirm the copies changed
+        //
+        obj1 = {a: 42, b: 42};
+        expect(arrResult[2] === obj1).to.be.false;               // they are now different objects
+        expect(arrResult[2]).to.deep.equal(constObj1);           // but it points to the original object
+        expect(listResult.at(2) === obj1).to.be.false;     // they are now different objects
+        expect(listResult.at(2)).to.deep.equal(constObj1); // but it points to the original object
       });
     });
     describe('includes', () => {
