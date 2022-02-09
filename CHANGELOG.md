@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.5] - 2022-02-09
+
+- Improved and correct method comments.
+- Implemented "includes", "concat", "every", and "some" methods
+
 ## [0.0.4] - 2022-02-06
 
 - Iterator is now an IterableIterator
