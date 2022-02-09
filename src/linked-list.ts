@@ -114,7 +114,7 @@ type IterationFunction<T> = (value: T, index: number) => boolean;
 // type GetLinkedListT<C extends LinkedList<unknown>> = C extends LinkedList<infer T> ? T : unknown;
 
 /**
- * Implementation of a simple generic singly-linked Linked List.
+ * Implementation of a generic singly-linked Linked List.
  * Ideal to replace large arrays where you:
  *  - insert at the beginning (unshift)
  *  - append to the end (push)
