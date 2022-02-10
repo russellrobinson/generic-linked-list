@@ -200,8 +200,9 @@ type IterationFunction<T> = (value: T, index: number) => boolean;
  *  ```typescript
  *  const myNumberList = new LinkedList<number>();    // an empty list of numbers
  *  myNumberList.push(1, 2, 3);                       // append to the list
- *  const firstValue = myNumberList.shift();
+ *  const firstValue = myNumberList.shift();          // remove the first element
  *  console.log(firstValue);                          // outputs: 1
+ *  console.log(...myNumberList);                     // outputs: 2 3
  *
  *  // Build a list people.
  *  type Person = {name: string, age: number};
