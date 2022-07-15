@@ -173,7 +173,7 @@ type IterationFunction<T> = (value: T, index: number) => boolean;
  *  - `at`, `indexOf`, `includes` - fully supported except with negative indexes
  *  - `lastIndexOf`, `sort` - cannot be efficiently implemented and are excluded
  *  - `keys` - has no meaning in a LinkedList and is not implemented
- *  - `reverse` - cannot be implemented with a a singly-linked list
+ *  - `reverse` - cannot be implemented with a singly-linked list (needs to be converted to an array first)
  *
  * ### Workaround
  * For missing methods or features, you can convert your LinkedList to an Array and perform the operation on that
@@ -208,9 +208,11 @@ type IterationFunction<T> = (value: T, index: number) => boolean;
  *  type Person = {name: string, age: number};
  *  const peopleList = new LinkedList<Person>();
  *  peopleList.push({name: 'John', age: 12}, {name: 'Kylie', age: 14});
+ *  console.log(...peopleList);
  *
  *  // convert to an array
  *  const peopleArray = [...peopleList];
+ *  console.log(peopleArray);
  *  ```
  *
  *  @typeParam T    the type of each value in the list
@@ -612,6 +614,19 @@ export class LinkedList<T> implements Iterable<T> {
       }
     });
     return result;
+  }
+
+  /**
+   * Return a string representation of the list and its elements
+   */
+  public toString(): string {
+    const valueList: string[] = [];
+
+    this.forEach(value => {
+      valueList.push(JSON.stringify(value));
+    });
+
+    return valueList.join(',');
   }
 
   /* TODO
