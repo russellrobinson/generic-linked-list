@@ -189,7 +189,7 @@ type IterationFunction<T> = (value: T, index: number) => boolean;
  * ### Missing Methods
  * Depending on the version of the `generic-linked-list` package, some methods that can be implemented may not
  * _yet_ be implemented.  In this case, convert your list to an array and use array methods instead.
- * See the above **Workaround** section for an example of how to do this.
+ * See the above **Workaround** section for an example of how to achieve this.
  *
  * ## Use cases
  *  1. To replace very large arrays (10's or 100's of thousands of elements).
