@@ -147,7 +147,6 @@ type IterationFunction<T> = (value: T, index: number) => boolean;
  * See: https://stackoverflow.com/questions/18215899/get-type-of-generic-parameter
  * However, it only works if you can create an instance of T, and there's no way to achieve that.
  */
-
 // type GetLinkedListT<C extends LinkedList<unknown>> = C extends LinkedList<infer T> ? T : unknown;
 
 /**
