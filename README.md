@@ -1,8 +1,7 @@
 # Single-Linked List Using Generics
 
 ## About
-This project implements a Single-Linked List that you can use for link
-objects of any type.
+This project implements a Single-Linked List that you can use for a linked list of any data type.
 
 The motivations for this project are:
 
@@ -42,7 +41,7 @@ The project was developed in NodeJs version 14.15.4 and should run seamlessly in
 version of Node.js.
 
 ## TypeScript version
-The project was developed with TypeScript 4.5.5 and should compiles seamlessly in any later
+The project was developed with TypeScript 4.5.5 and should compile seamlessly in any later
 version of TypeScript.
 
 ## About the author
