@@ -256,9 +256,11 @@ export class LinkedList<T> implements Iterable<T> {
   }
 
   /**
-   * Append to the end of a list
+   * Append to the end of a list.
    * @param valueList a set of values to append to the list
    * @returns the new length of the list
+   *
+   * #### Complexity: O(n) where n is the number of values being appended - typically O(1)
    */
   public push(...valueList: T[]): number {
     for (const value of valueList) {
@@ -287,6 +289,8 @@ export class LinkedList<T> implements Iterable<T> {
    * Insert at the beginning of a list
    * @param valueList
    * @returns the new length of the list
+   *
+   * #### Complexity: O(n) where n is the number of values being inserted - typically O(1)
    */
   public unshift(...valueList: T[]): number {
     //
@@ -305,6 +309,8 @@ export class LinkedList<T> implements Iterable<T> {
   /**
    * Remove the first element from the list.
    * @returns the element removed from the front of the list, or `undefined` if the list is empty
+   *
+   * #### Complexity: O(1)
    */
   public shift(): T | undefined {
     let result: T | undefined = undefined;
@@ -333,7 +339,10 @@ export class LinkedList<T> implements Iterable<T> {
 
   /**
    * Get the length of the list.
+   * The length is maintained internally, so there is no cost to this request.
    * @returns the length of the list
+   *
+   * #### Complexity: O(0)
    */
   get length(): number {
     return this._length;
@@ -399,6 +408,9 @@ export class LinkedList<T> implements Iterable<T> {
    * Find the first element in the list where the predicate function returns `true`.
    * @param predicate a function to test each element in the list
    * @param thisArg   a "this" value to bind to the predicate function
+   * @returns the found element or undefined if not found
+   *
+   * #### Complexity: O(n) where n is the size of the linked list
    */
   public find(predicate: LinkedListPredicate<T>, thisArg?: any): T | undefined {
     let result: T | undefined = undefined;
@@ -415,6 +427,9 @@ export class LinkedList<T> implements Iterable<T> {
    * Find the first element in the list where the predicate function returns `true` and return the index of the element.
    * @param predicate a function to test each element in the list
    * @param thisArg   a "this" value to bind to the predicate function
+   * @returns the position in the list of the found element or -1 if not found
+   *
+   * #### Complexity: O(n) where n is the size of the linked list
    */
   public findIndex(predicate: LinkedListPredicate<T>, thisArg?: any): number {
     let result: number = -1;
@@ -432,6 +447,8 @@ export class LinkedList<T> implements Iterable<T> {
    * @param testValue   the value to find in the list
    * @param fromIndex   the index from which to start the search; -ve numbers are not supported and throw an exception
    * @returns the index of the first list element that is === to testValue, or -1 if no such list element is found
+   *
+   * #### Complexity: O(n) where n is the size of the linked list
    */
   public indexOf(testValue: T, fromIndex = 0): number {
     let result: number = -1;
@@ -471,10 +488,12 @@ export class LinkedList<T> implements Iterable<T> {
   }
 
   /**
-   * Test if the list contains the given value, ujsing the sameValueZero algorithm for comparison.
+   * Test if the list contains the given value, using the sameValueZero algorithm for comparison.
    * @param testValue   the value to look for in the list
    * @param fromIndex   the index from which to start the search; -ve numbers are not supported and throw an exception
    * @returns `true` if the list includes the given value
+   *
+   * #### Complexity: O(n) where n is the size of the linked list
    */
   public includes(testValue: T, fromIndex = 0): boolean {
     let result = false;
@@ -499,6 +518,8 @@ export class LinkedList<T> implements Iterable<T> {
    * @param predicate   a function to test each element in the list
    * @param thisArg     a "this" value to bind to the predicate function
    * @returns a new linked list with the just the elements that satisfied the predicate
+   *
+   * #### Complexity: O(n) where n is the size of the linked list
    */
   public filter(predicate: LinkedListPredicate<T>, thisArg?: any): LinkedList<T> {
     const result = new LinkedList<T>();
@@ -522,6 +543,8 @@ export class LinkedList<T> implements Iterable<T> {
    * However, if this is a major part of your use case and your list is large, then you should probably
    * consider a different data structure.
    * @returns the element at the given index or `undefined`
+   *
+   * #### Complexity: O(n) where n is the size of the linked list
    */
   public at(index: number): T | undefined {
     if (index < 0) {
@@ -541,6 +564,8 @@ export class LinkedList<T> implements Iterable<T> {
    * @param callback    a function to call for each element in the list
    * @param thisArg     a "this" value to bind to the callback function
    * @returns the linked list itself
+   *
+   * #### Complexity: O(n) where n is the size of the linked list
    */
   public forEach(callback: LinkedListCallback<T>, thisArg?: any): LinkedList<T> {
     const callCallback = callback.bind(thisArg);
@@ -558,6 +583,8 @@ export class LinkedList<T> implements Iterable<T> {
    * @param predicate   a function to test each element in the list
    * @param thisArg     a "this" value to bind to the predicate function
    * @returns `true` if all elements obey the predicate, otherwise `false`
+   *
+   * #### Complexity: O(n) where n is the size of the linked list
    */
   public every(predicate: LinkedListPredicate<T>, thisArg?: any): boolean {
     let result: boolean = true;       // return true on an empty list
@@ -581,6 +608,8 @@ export class LinkedList<T> implements Iterable<T> {
    * @param predicate   a function to test each element in the list
    * @param thisArg     a "this" value to bind to the predicate function
    * @returns `true` if at least one element obeys the predicate, otherwise false
+   *
+   * #### Complexity: O(n) where n is the size of the linked list
    */
   public some(predicate: LinkedListPredicate<T>, thisArg?: any): boolean {
     let result: boolean = false;       // return false on an empty list
@@ -599,6 +628,8 @@ export class LinkedList<T> implements Iterable<T> {
    * Concatenate values onto the end of the list.
    * @param values options values to concatenate; each value can be a `T` or a `LinkedList<T>`
    * @returns a new list
+   *
+   * #### Complexity: O(n) where n is the number of values being appended - typically O(1)
    */
   public concat(...values: (T | LinkedList<T>)[]): LinkedList<T> {
     let result: LinkedList<T> = new LinkedList<T>(this);
