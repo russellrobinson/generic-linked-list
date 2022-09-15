@@ -537,14 +537,17 @@ export class LinkedList<T> implements Iterable<T> {
    *
    * Unlike Array, negative indexes are not supported and throw an exception.
    *
-   * This method is much slower than an array, but is still useful if you need to work with
+   * In general, this method is much slower than an array, but is still useful if you need to work with
    * positions within the list.
    *
    * However, if this is a major part of your use case and your list is large, then you should probably
    * consider a different data structure.
+   *
+   * Getting the first element in the queue is instant.
+   *
    * @returns the element at the given index or `undefined`
    *
-   * #### Complexity: O(n) where n is the size of the linked list
+   * #### Complexity: O(n) where n is the index you've requested.
    */
   public at(index: number): T | undefined {
     if (index < 0) {
