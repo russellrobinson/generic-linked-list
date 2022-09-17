@@ -159,6 +159,8 @@ type IterationFunction<T> = (value: T, index: number) => boolean;
  *  - remove from the beginning (shift)
  *
  * These operations are O(1) for a linked list, but O(n) for array shift and unshift.
+ * Array push is mostly O(1), but can be O(n) with large arrays due to reallocation of
+ * the array's memory internally.
  *
  * Unit tests show 3 orders of magnitude speed increase over Array, which is significant for
  * large arrays.
@@ -232,7 +234,7 @@ export class LinkedList<T> implements Iterable<T> {
   protected _length: number;
 
   /**
-   * Construct the linked list, and optionally load its element using the given iterator.
+   * Construct the linked list, and optionally load its contents using the given iterator.
    * @param it    any iterable of T's with which you want to load the list
    */
   constructor(it?: Iterable<T>) {
@@ -517,7 +519,7 @@ export class LinkedList<T> implements Iterable<T> {
    * Filter the list and return a new list with the elements for which the predicate function returns `true`.
    * @param predicate   a function to test each element in the list
    * @param thisArg     a "this" value to bind to the predicate function
-   * @returns a new linked list with the just the elements that satisfied the predicate
+   * @returns a new linked list with just the elements that satisfied the predicate
    *
    * #### Complexity: O(n) where n is the size of the linked list
    */
