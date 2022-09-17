@@ -40,10 +40,10 @@ With `npm`:
 npm --save-prod i generic-linked-list
 ```
 
-### Typescript Examples 
+### TypeScript examples 
 
 #### Example 1
-```
+```typescript
 import { LinkedList } from 'generic-linked-list';
 
 const numList = new LinkedList([1, 2, 3]);
@@ -57,7 +57,7 @@ Expected output:
 ```
 
 #### Example 2
-```
+```typescript
 import { LinkedList } from 'generic-linked-list';
 
 type Person = { name: string, age: number; parent?: Person };

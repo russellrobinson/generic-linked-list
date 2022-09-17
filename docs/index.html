@@ -26,12 +26,53 @@ in TypeScript (which compiles to JavaScript), you can use it in code targeting b
 <p>However, some operations are O(n) in Time Complexity.  These include shift and unshift.</p>
 <p>This means working with large datasets is faster with a Linked List compared to an Array.</p>
 
+<a href="#getting-started" id="getting-started" style="color: inherit; text-decoration: none;">
+  <h2>Getting started</h2>
+</a>
+<ol>
+<li>Import the library.</li>
+<li>Create your linked list.</li>
+<li>Use it!</li>
+</ol>
+
+<a href="#add-to-your-project" id="add-to-your-project" style="color: inherit; text-decoration: none;">
+  <h3>Add to your project</h3>
+</a>
+<p>With <code>yarn</code>:</p>
+<pre><code class="language-shell"><span class="hl-0">yarn add generic-linked-list --save</span>
+</code></pre>
+<p>With <code>npm</code>:</p>
+<pre><code class="language-shell"><span class="hl-0">npm --save-prod i generic-linked-list</span>
+</code></pre>
+
+<a href="#typescript-examples" id="typescript-examples" style="color: inherit; text-decoration: none;">
+  <h3>TypeScript examples</h3>
+</a>
+
+<a href="#example-1" id="example-1" style="color: inherit; text-decoration: none;">
+  <h4>Example 1</h4>
+</a>
+<pre><code class="language-typescript"><span class="hl-1">import</span><span class="hl-0"> { </span><span class="hl-2">LinkedList</span><span class="hl-0"> } </span><span class="hl-1">from</span><span class="hl-0"> </span><span class="hl-3">&#39;generic-linked-list&#39;</span><span class="hl-0">;</span><br/><br/><span class="hl-4">const</span><span class="hl-0"> </span><span class="hl-5">numList</span><span class="hl-0"> = </span><span class="hl-4">new</span><span class="hl-0"> </span><span class="hl-6">LinkedList</span><span class="hl-0">([</span><span class="hl-7">1</span><span class="hl-0">, </span><span class="hl-7">2</span><span class="hl-0">, </span><span class="hl-7">3</span><span class="hl-0">]);</span><br/><span class="hl-2">console</span><span class="hl-0">.</span><span class="hl-6">log</span><span class="hl-0">(...</span><span class="hl-2">numList</span><span class="hl-0">);</span><br/><span class="hl-2">console</span><span class="hl-0">.</span><span class="hl-6">log</span><span class="hl-0">(</span><span class="hl-2">numList</span><span class="hl-0">.</span><span class="hl-6">toString</span><span class="hl-0">());</span>
+</code></pre>
+<p>Expected output:</p>
+<pre><code><span class="hl-7">1</span><span class="hl-0"> </span><span class="hl-7">2</span><span class="hl-0"> </span><span class="hl-7">3</span><br/><span class="hl-7">1</span><span class="hl-0">,</span><span class="hl-7">2</span><span class="hl-0">,</span><span class="hl-7">3</span>
+</code></pre>
+
+<a href="#example-2" id="example-2" style="color: inherit; text-decoration: none;">
+  <h4>Example 2</h4>
+</a>
+<pre><code class="language-typescript"><span class="hl-1">import</span><span class="hl-0"> { </span><span class="hl-2">LinkedList</span><span class="hl-0"> } </span><span class="hl-1">from</span><span class="hl-0"> </span><span class="hl-3">&#39;generic-linked-list&#39;</span><span class="hl-0">;</span><br/><br/><span class="hl-4">type</span><span class="hl-0"> </span><span class="hl-8">Person</span><span class="hl-0"> = { </span><span class="hl-2">name</span><span class="hl-0">: </span><span class="hl-8">string</span><span class="hl-0">, </span><span class="hl-2">age</span><span class="hl-0">: </span><span class="hl-8">number</span><span class="hl-0">; </span><span class="hl-2">parent</span><span class="hl-0">?: </span><span class="hl-8">Person</span><span class="hl-0"> };</span><br/><span class="hl-4">const</span><span class="hl-0"> </span><span class="hl-5">peopleList</span><span class="hl-0"> = </span><span class="hl-4">new</span><span class="hl-0"> </span><span class="hl-6">LinkedList</span><span class="hl-0">&lt;</span><span class="hl-8">Person</span><span class="hl-0">&gt;();</span><br/><span class="hl-2">peopleList</span><span class="hl-0">.</span><span class="hl-6">push</span><span class="hl-0">(</span><br/><span class="hl-0">  {</span><span class="hl-2">name:</span><span class="hl-0"> </span><span class="hl-3">&#39;John&#39;</span><span class="hl-0">, </span><span class="hl-2">age:</span><span class="hl-0"> </span><span class="hl-7">12</span><span class="hl-0">, </span><span class="hl-2">parent:</span><span class="hl-0"> {</span><span class="hl-2">name :</span><span class="hl-3">&#39;John&#39;</span><span class="hl-0">, </span><span class="hl-2">age:</span><span class="hl-0"> </span><span class="hl-7">42</span><span class="hl-0">}},</span><br/><span class="hl-0">  {</span><span class="hl-2">name:</span><span class="hl-0"> </span><span class="hl-3">&#39;Kylie&#39;</span><span class="hl-0">, </span><span class="hl-2">age:</span><span class="hl-0"> </span><span class="hl-7">14</span><span class="hl-0">}</span><br/><span class="hl-0">);</span><br/><span class="hl-2">console</span><span class="hl-0">.</span><span class="hl-6">log</span><span class="hl-0">(...</span><span class="hl-2">peopleList</span><span class="hl-0">);</span><br/><span class="hl-2">console</span><span class="hl-0">.</span><span class="hl-6">log</span><span class="hl-0">(</span><span class="hl-2">peopleList</span><span class="hl-0">.</span><span class="hl-6">toString</span><span class="hl-0">());</span>
+</code></pre>
+<p>Expected output:</p>
+<pre><code><span class="hl-0">{ </span><span class="hl-9">name</span><span class="hl-0">: </span><span class="hl-3">&#39;John&#39;</span><span class="hl-0">, </span><span class="hl-9">age</span><span class="hl-0">: </span><span class="hl-7">12</span><span class="hl-0">, </span><span class="hl-9">parent</span><span class="hl-0">: { </span><span class="hl-9">name</span><span class="hl-0">: </span><span class="hl-3">&#39;John&#39;</span><span class="hl-0">, </span><span class="hl-9">age</span><span class="hl-0">: </span><span class="hl-7">42</span><span class="hl-0"> } } { </span><span class="hl-9">name</span><span class="hl-0">: </span><span class="hl-3">&#39;Kylie&#39;</span><span class="hl-0">, </span><span class="hl-9">age</span><span class="hl-0">: </span><span class="hl-7">14</span><span class="hl-0"> }</span><br/><span class="hl-0">{</span><span class="hl-3">&quot;name&quot;</span><span class="hl-0">:</span><span class="hl-3">&quot;John&quot;</span><span class="hl-0">,</span><span class="hl-3">&quot;age&quot;</span><span class="hl-0">:</span><span class="hl-7">12</span><span class="hl-0">,</span><span class="hl-3">&quot;parent&quot;</span><span class="hl-0">:{</span><span class="hl-3">&quot;name&quot;</span><span class="hl-2">:</span><span class="hl-3">&quot;John&quot;</span><span class="hl-0">,</span><span class="hl-3">&quot;age&quot;</span><span class="hl-2">:</span><span class="hl-7">42</span><span class="hl-0">}},{</span><span class="hl-3">&quot;name&quot;</span><span class="hl-2">:</span><span class="hl-3">&quot;Kylie&quot;</span><span class="hl-0">,</span><span class="hl-3">&quot;age&quot;</span><span class="hl-2">:</span><span class="hl-7">14</span><span class="hl-0">}</span>
+</code></pre>
+
 <a href="#where-to-next" id="where-to-next" style="color: inherit; text-decoration: none;">
   <h2>Where to next?</h2>
 </a>
 <p>The documentation is generated using <a href="https://www.npmjs.com/package/typedoc">TypeDoc</a> using
 comments in the source code.</p>
-<p>The class documentation is the <a href="classes/linked_list.LinkedList.html">best place to start</a>.</p>
+<p>The project&#39;s GitHub page contains the documentation and is <a href="https://russellrobinson.github.io/generic-linked-list/classes/linked_list.LinkedList.html">the best place to start</a>.</p>
 
 <a href="#example-code" id="example-code" style="color: inherit; text-decoration: none;">
   <h2>Example code</h2>
