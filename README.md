@@ -23,12 +23,65 @@ However, some operations are O(n) in Time Complexity.  These include shift and u
 
 This means working with large datasets is faster with a Linked List compared to an Array.
 
+## Getting started
+1. Import the library.
+2. Create your linked list.
+3. Use it!
+
+### Add to your project
+
+With `yarn`:
+```shell
+yarn add generic-linked-list --save
+```
+
+With `npm`:
+```shell
+npm --save-prod i generic-linked-list
+```
+
+### Typescript Examples 
+
+#### Example 1
+```
+import { LinkedList } from 'generic-linked-list';
+
+const numList = new LinkedList([1, 2, 3]);
+console.log(...numList);
+console.log(numList.toString());
+```
+Expected output:
+```
+1 2 3
+1,2,3
+```
+
+#### Example 2
+```
+import { LinkedList } from 'generic-linked-list';
+
+type Person = { name: string, age: number; parent?: Person };
+const peopleList = new LinkedList<Person>();
+peopleList.push(
+  {name: 'John', age: 12, parent: {name :'John', age: 42}},
+  {name: 'Kylie', age: 14}
+);
+console.log(...peopleList);
+console.log(peopleList.toString());
+```
+
+Expected output:
+```
+{ name: 'John', age: 12, parent: { name: 'John', age: 42 } } { name: 'Kylie', age: 14 }
+{"name":"John","age":12,"parent":{"name":"John","age":42}},{"name":"Kylie","age":14}
+```
+
 ## Where to next?
 
 The documentation is generated using [TypeDoc](https://www.npmjs.com/package/typedoc) using
 comments in the source code.
 
-The class documentation is the [best place to start](classes/linked_list.LinkedList.html).
+My github page contains the documentation and is [the best place to start](https://russellrobinson.github.io/generic-linked-list/classes/linked_list.LinkedList.html).
 
 ## Example code
 To access example code that actually runs:
