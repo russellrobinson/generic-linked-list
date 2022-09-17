@@ -1,5 +1,13 @@
 # Changelog
 
+
+## [1.0.0] - 2022-02-11
+
+- Improved comments.
+- Implemented missing fromIndex parameters.
+- Implemented typedoc to generate HTML documentation.
+- Added examples code.
+
 ## [0.0.5] - 2022-02-09
 
 - Improved and correct method comments.

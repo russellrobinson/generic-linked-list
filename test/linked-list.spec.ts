@@ -372,6 +372,15 @@ describe('linked-list', () => {
         const list = new LinkedList<number>(arr);
         expect(list.indexOf(2)).to.equal(1);
       });
+      it('accepts the fromIndex just like Array (except for  -ve indexes)', () => {
+        const arr = [1, 2, 3, 4, 2, 2];
+        expect(arr.indexOf(2, 3)).to.equal(4);
+
+        const list = new LinkedList<number>(arr);
+        expect(list.indexOf(2, 3)).to.equal(4);
+
+        expect(() => list.indexOf(2, -1)).to.throw();
+      });
       it('returns -1 with no matching element just like Array', () => {
         const arr = [1, 2, 3, 4];
         expect(arr.indexOf(5)).to.equal(-1);
@@ -520,69 +529,80 @@ describe('linked-list', () => {
     describe('includes', () => {
       it('finds a matching element just like Array', () => {
         const arr = [1, 2, 3, 4];
-        expect(arr.includes(2)).to.true;
+        expect(arr.includes(2)).to.be.true;
 
         const list = new LinkedList<number>(arr);
-        expect(list.includes(2)).to.true;
+        expect(list.includes(2)).to.be.true;
+      });
+      it('accepts the fromIndex just like Array (except for  -ve indexes)', () => {
+        const arr = [1, 2, 3, 4, 2, 2];
+        expect(arr.includes(2, 3)).to.be.true;
+        expect(arr.includes(3, 3)).to.be.false;
+
+        const list = new LinkedList<number>(arr);
+        expect(list.includes(2, 3)).to.be.true;
+        expect(arr.includes(3, 3)).to.be.false;
+
+        expect(() => list.includes(2, -1)).to.throw();
       });
       it('returns false with no matching element just like Array', () => {
         const arr = [1, 2, 3, 4];
-        expect(arr.includes(5)).to.false;
+        expect(arr.includes(5)).to.be.false;
 
         const list = new LinkedList<number>(arr);
-        expect(list.includes(5)).to.false;
+        expect(list.includes(5)).to.be.false;
       });
       it('returns false with empty list just like Array', () => {
         // noinspection JSMismatchedCollectionQueryUpdate
         const arr: number[] = [];
-        expect(arr.includes(1)).to.false;
+        expect(arr.includes(1)).to.be.false;
 
         const list = new LinkedList<number>();
-        expect(list.includes(1)).to.false;
+        expect(list.includes(1)).to.be.false;
       });
       it('uses strict equality just like Array', () => {
         //
         // strict equality doesn't work with objects - they must be the same object
         //
         const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
-        expect(arr.includes({a: 2, b: 2})).to.false;
+        expect(arr.includes({a: 2, b: 2})).to.be.false;
 
         const list = new LinkedList<Obj>(arr);
-        expect(list.includes({a: 2, b: 2})).to.false;
+        expect(list.includes({a: 2, b: 2})).to.be.false;
 
         //
         // So, now we test with the actual object, and it works
         //
-        expect(arr.includes(arr[1])).to.true;
-        expect(list.includes(arr[1])).to.true;
+        expect(arr.includes(arr[1])).to.be.true;
+        expect(list.includes(arr[1])).to.be.true;
       });
       it('finds NaN just like Array', () => {
         const arr = [1, NaN, 3, 4, 2];
-        expect(arr.includes(NaN)).to.true;
+        expect(arr.includes(NaN)).to.be.true;
 
         const list = new LinkedList<number>(arr);
-        expect(list.includes(NaN)).to.true;
+        expect(list.includes(NaN)).to.be.true;
       });
       it('finds no NaN just like Array', () => {
         const arr = [1, 3, 4, 2];
-        expect(arr.includes(NaN)).to.false;
+        expect(arr.includes(NaN)).to.be.false;
 
         const list = new LinkedList<number>(arr);
-        expect(list.includes(NaN)).to.false;
+        expect(list.includes(NaN)).to.be.false;
       });
       it('finds undefined just like Array', () => {
         const arr = [1, undefined, 3, 4, 2];
-        expect(arr.includes(undefined)).to.true;
+        expect(arr.includes(undefined)).to.be.true;
 
         const list = new LinkedList<unknown>(arr);
-        expect(list.includes(undefined)).to.true;
+        expect(list.includes(undefined)).to.be.true;
       });
       it('finds null just like Array', () => {
         const arr = [1, null, 3, 4, 2];
-        expect(arr.includes(null)).to.true;
+        expect(arr.includes(null)).to.be.true;
 
         const list = new LinkedList<unknown>(arr);
-        expect(list.includes(null)).to.true;
+        expect(list.includes(null)).to.be.true;
       });
     });
     describe('find & findIndex', () => {
