@@ -81,7 +81,7 @@ Expected output:
 The documentation is generated using [TypeDoc](https://www.npmjs.com/package/typedoc) using
 comments in the source code.
 
-My github page contains the documentation and is [the best place to start](https://russellrobinson.github.io/generic-linked-list/classes/linked_list.LinkedList.html).
+The project's GitHub page contains the documentation and is [the best place to start](https://russellrobinson.github.io/generic-linked-list/classes/linked_list.LinkedList.html).
 
 ## Example code
 To access example code that actually runs:
