@@ -8,35 +8,44 @@ import { LinkedList } from '../src/linked-list';
 import * as _ from 'lodash';
 
 describe('linked-list', () => {
+
+  function toMega(amount: number): number {
+    return amount / 1024 / 1024;
+  }
+
+  function toMilli(amount: number): number {
+    return amount / 1_000_000;
+  }
+
+
   describe('LinkedList', () => {
-    function insertArray(count: number): number[] {
-      const list: number[] = [];
+    type makeFn<T> = (count: number) => T;
+    const returnCount: makeFn<number> = (count: number) => count;
+
+    function unshiftArray<T>(count: number, makeValue: (count: number) => T, arr: T[] = []): T[] {
       for (let ii = 0; ii < count; ii++) {
-        list.unshift(ii);
+        arr.unshift(makeValue(ii));
+      }
+      return arr;
+    }
+
+    function pushArray<T>(count: number, makeValue: (count: number) => T, arr: T[] = []): T[] {
+      for (let ii = 0; ii < count; ii++) {
+        arr.push(makeValue(ii));
+      }
+      return arr;
+    }
+
+    function pushList<T>(count: number, makeValue: (count: number) => T, list = new LinkedList<T>()): LinkedList<T> {
+      for (let ii = 0; ii < count; ii++) {
+        list.push(makeValue(ii));
       }
       return list;
     }
 
-    function appendArray(count: number): number[] {
-      const list: number[] = [];
-      for (let ii = 0; ii < count; ii++) {
-        list.push(ii);
-      }
-      return list;
-    }
-
-    function appendList(count: number): LinkedList<number> {
-      const list = new LinkedList<number>();
-      for (let ii = 0; ii < count; ii++) {
-        list.push(ii);
-      }
-      return list;
-    }
-
-    function insertList(count: number): LinkedList<number> {
-      const list = new LinkedList<number>();
+    function unshiftList<T>(count: number, makeValue: (count: number) => T, list = new LinkedList<T>()): LinkedList<T> {
       for (let ii = count; --ii >= 0;) {
-        list.unshift(ii);
+        list.unshift(makeValue(ii));
       }
       return list;
     }
@@ -134,7 +143,7 @@ describe('linked-list', () => {
       });
       it('appends and retrieves', () => {
         const count = 10_000;
-        const list = appendList(count);
+        const list = pushList(count, returnCount);
 
         expect(list.length).to.equal(count);
         for (let ii = 0; ii < count; ii++) {
@@ -178,7 +187,7 @@ describe('linked-list', () => {
 
       it('inserts and retrieves', () => {
         const count = 10_000;
-        const list = insertList(count);
+        const list = unshiftList(count, returnCount);
 
         expect(list.length).to.equal(count);
         for (let ii = 0; ii < count; ii++) {
@@ -216,7 +225,7 @@ describe('linked-list', () => {
     describe('iteration', () => {
       it('has an iterator interface', () => {
         const count = 10_000;
-        const list = insertList(count);
+        const list = unshiftList(count, returnCount);
         let index = 0;
 
         for (let value of list) {
@@ -226,7 +235,7 @@ describe('linked-list', () => {
       });
       it('obeys the iterator protocol', () => {
         const count = 10_000;
-        const list = insertList(count);
+        const list = unshiftList(count, returnCount);
         let it = list[Symbol.iterator]();
         let next;
         let index = 0;
@@ -242,8 +251,8 @@ describe('linked-list', () => {
       });
       it('provides an iterableiterator, just like Array', () => {
         const count = 10_000;
-        const arr = appendArray(count);
-        const list = appendList(count);
+        const arr = pushArray(count, returnCount);
+        const list = pushList(count, returnCount);
 
         const arrIter: IterableIterator<number> = arr[Symbol.iterator]();
         const listIter: IterableIterator<number> = list[Symbol.iterator]();
@@ -256,7 +265,7 @@ describe('linked-list', () => {
       });
       it('works with nested iterators, just like Array', () => {
         const count = 100;
-        const arr = appendArray(count);
+        const arr = pushArray(count, returnCount);
         let index = 0;
 
         for (const value1 of arr) {
@@ -274,7 +283,7 @@ describe('linked-list', () => {
       });
       it('can convert to an array', () => {
         const count = 10_000;
-        const list = insertList(count);
+        const list = unshiftList(count, returnCount);
         const arr = Array.from(list);
 
         expect(arr.length).to.equal(count);
@@ -286,7 +295,7 @@ describe('linked-list', () => {
       });
       it('works with the spread operator', () => {
         const count = 10_000;
-        const list = insertList(count);
+        const list = unshiftList(count, returnCount);
         const arr = [...list];
 
         expect(arr.length).to.equal(count);
@@ -298,7 +307,7 @@ describe('linked-list', () => {
       });
       it('instantiates with an existing list', () => {
         const count = 10_000;
-        const origList = appendList(count);
+        const origList = pushList(count, returnCount);
         const dupList = new LinkedList<number>(origList);
 
         expect(dupList.length).to.equal(origList.length);
@@ -1012,12 +1021,12 @@ describe('linked-list', () => {
           // measure list insert
           //
           const start = hrtime.bigint();
-          const list = insertList(count);
+          const list = unshiftList(count, returnCount);
           const end = hrtime.bigint();
 
           expect(list.length).to.equal(count);
 
-          return Number(end - start) / 1_000_000;    // return milliseconds
+          return toMilli(Number(end - start));  // return milliseconds
         };
 
         const runArray = (): number => {
@@ -1025,12 +1034,12 @@ describe('linked-list', () => {
           // measure array insert
           //
           const start = hrtime.bigint();
-          const arr = insertArray(count);
+          const arr = unshiftArray(count, returnCount);
           const end = hrtime.bigint();
 
           expect(arr.length).to.equal(count);
 
-          return Number(end - start) / 1_000_000;    // return milliseconds
+          return toMilli(Number(end - start));  // return milliseconds
         };
 
         const listTimeMs = runList();
@@ -1049,7 +1058,7 @@ describe('linked-list', () => {
         const speedFactor = 300;   // much faster than this, but affected by coverage
 
         const runList = (): number => {
-          const list = appendList(count);     // build the list quickly
+          const list = pushList(count, returnCount);     // build the list quickly
 
           //
           // measure shift retrieval
@@ -1061,11 +1070,11 @@ describe('linked-list', () => {
           const end = hrtime.bigint();
           expect(list.length).to.equal(0);
 
-          return Number(end - start) / 1_000_000;    // return milliseconds
+          return toMilli(Number(end - start));  // return milliseconds
         };
 
         const runArray = (): number => {
-          const arr = appendArray(count);     // build the array quickly
+          const arr = pushArray(count, returnCount);     // build the array quickly
 
           //
           // measure shift retrieval
@@ -1077,7 +1086,8 @@ describe('linked-list', () => {
           const end = hrtime.bigint();
           expect(arr.length).to.equal(0);
 
-          return Number(end - start) / 1_000_000;    // return milliseconds
+          return toMilli(Number(end - start));  // return milliseconds
+
         };
 
         const listTimeMs = runList();
@@ -1085,6 +1095,104 @@ describe('linked-list', () => {
 
         console.log(`Array is ${(arrayTimeMs / listTimeMs).toFixed(1)} times slower than LinkedList for shift retrieval`);
         expect(arrayTimeMs / listTimeMs).to.be.greaterThan(speedFactor);
+      });
+
+      //
+      // Array is very fast for push, but slows down when the objects being pushed are big in size.
+      // This test shows that LinkedList is comparable to array in time and memory use when the elements are
+      // > 100 bytes in size and the array or list size in several million.
+      //
+      // To run this test, you must start node with: --expose-gc
+      // If you want to test with bigger numbers, you may also need: --max-old-space-size=10000
+      //
+      it('list push is comparable to array for substantial elements', function () {
+        this.timeout(80_000);   // event loop is blocked, so this only affects the end
+
+        //
+        // These values provide the comparison; your results may vary depending on your computer's
+        // capabilities.
+        //
+        const slownessFactor = 1.5;     // list will be less than this much slower than array
+        const memoryFactor = 1.1;       // list will use less than this much more memory than array
+        const sizeThreshold = 300;      // this is the size at which LinkedList becomes comparable to array
+
+        const startCount = 2_000_000;
+        const listStartCount = startCount;
+        const arrStartCount = startCount;
+        const measureCount = 4_000_000;
+
+        const obj = {
+          hello: 'world',
+          mesg: 'My dog has fleas',
+          num: 424242,
+          x: 'x'.repeat(sizeThreshold)
+        };
+
+        const makeObject: makeFn<Object> = (count: number) => {
+          return {...obj, n: count};
+          // return {...obj, xs: 'x'.repeat(count % 200)};
+        };
+
+        const runList = (): number => {
+          const start = hrtime.bigint();
+          pushList(measureCount, makeObject, list);
+          const end = hrtime.bigint();
+
+          expect(list.length).to.equal(listStartCount + measureCount);
+
+          return toMilli(Number(end - start));  // return milliseconds
+        };
+
+        const runArray = (): number => {
+          const start = hrtime.bigint();
+          pushArray(measureCount, makeObject, arr);
+          const end = hrtime.bigint();
+
+          expect(arr.length).to.equal(arrStartCount + measureCount);
+
+          return toMilli(Number(end - start));  // return milliseconds
+        };
+
+        function forceGC() {
+          if (global.gc) {
+            global.gc();
+          }
+        }
+
+        forceGC();
+
+
+        let startUsed = process.memoryUsage().heapUsed;
+
+        let arr = pushArray(arrStartCount, makeObject);
+        const arrayTimeMs = runArray();
+        console.log(`Array done ${arrayTimeMs}ms`);
+        const arrUsedMB = toMega(process.memoryUsage().heapUsed - startUsed);
+        console.log(`Array uses approximately ${Math.round(arrUsedMB * 100) / 100} MB`);
+        arr = [];
+
+        forceGC();
+
+        // let freeUsed = process.memoryUsage().heapUsed - startUsed;
+        // console.log(`After freeing array: ${Math.round(toMega(freeUsed) * 100) / 100} MB`);
+
+        startUsed = process.memoryUsage().heapUsed;
+
+        let list = pushList(listStartCount, makeObject);
+        const listTimeMs = runList();
+        console.log(`List done ${listTimeMs}ms`);
+        const listUsedMB = toMega(process.memoryUsage().heapUsed - startUsed);
+        console.log(`List uses approximately ${Math.round(listUsedMB * 100) / 100} MB`);
+
+        list = new LinkedList<Object>();
+
+        // forceGC();
+        // freeUsed = process.memoryUsage().heapUsed - startUsed;
+        // console.log(`After freeing list ${Math.round(toMega(freeUsed) * 100) / 100} MB`);
+
+        // console.log(`Array is ${(listTimeMs / arrayTimeMs).toFixed(1)} times faster than LinkedList for push`);
+        expect(listTimeMs).to.be.lessThan(arrayTimeMs * slownessFactor, 'List took longer than expected');
+        expect(listUsedMB).to.be.lessThan(arrUsedMB * memoryFactor, 'List using more memory than expected');
       });
     });
   });

@@ -159,13 +159,16 @@ type IterationFunction<T> = (value: T, index: number) => boolean;
  *  - remove from the beginning (shift)
  *
  * These operations are O(1) for a linked list, but O(n) for array shift and unshift.
- * Array push is mostly O(1), but can be O(n) with large arrays due to reallocation of
- * the array's memory internally.
+ * Array push is extremely fast, and a linked list cannot generally compare because of the additional logic overhead.
+ * However, there is a element size and array/list size threshold where linked list is comparable to array.
  *
- * Unit tests show 3 orders of magnitude speed increase over Array, which is significant for
- * large arrays.
+ * ## Tests
+ * This package includes unit tests that show operational and speed tests results clearly.  The push test, however,
+ * requires you to start node with `--expose-gc` so is disabled.
  *
- * ## Comparison with Array
+ * The tests show 3 orders of magnitude speed increase over Array for shift and unshift, which is significant for large arrays.
+ *
+ * ## Feature comparison with Array
  * LinkedList is designed as a drop-in replacement for Array and implements most of the same methods as Array.
  * The unit tests specifically compare the operation of Array methods with LinkedList methods, to ensure
  * compatibility.
