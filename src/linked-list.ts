@@ -159,17 +159,17 @@ type IterationFunction<T> = (value: T, index: number) => boolean;
  *  - remove from the beginning (shift)
  *
  * These operations are O(1) for a linked list, but O(n) for array shift and unshift.
+ *
  * Array push is extremely fast, and a linked list cannot generally compare because of the additional logic overhead.
- * However, there is a element size and array/list size threshold where linked list is comparable to array.
+ * However, there is an element size and an array/list size threshold where linked list push is comparable to array push.
  *
- * ## Tests
- * This package includes unit tests that show operational and speed tests results clearly.  The push test, however,
- * requires you to start node with `--expose-gc` so is disabled.
- *
- * The tests show 3 orders of magnitude speed increase over Array for shift and unshift, which is significant for large arrays.
+ * ## Use cases
+ *  1. To replace very large arrays (10's or 100's of thousands of elements).
+ *  2. Implementing a FIFO queue (i.e. where you add elements at one end remove them from the other end).  This is slow for large arrays.
+ *  3. Insert operations in the middle of the list (which is slow in large arrays).
  *
  * ## Feature comparison with Array
- * LinkedList is designed as a drop-in replacement for Array and implements most of the same methods as Array.
+ * LinkedList implements most of the same methods as Array.
  * The unit tests specifically compare the operation of Array methods with LinkedList methods, to ensure
  * compatibility.
  *
@@ -190,15 +190,16 @@ type IterationFunction<T> = (value: T, index: number) => boolean;
  * console.log(arr.indexOf(5, -2));   // output is 5
  * ```
  *
- * ### Missing Methods
+ * ### Missing methods
  * Depending on the version of the `generic-linked-list` package, some methods that can be implemented may not
  * _yet_ be implemented.  In this case, convert your list to an array and use array methods instead.
  * See the above **Workaround** section for an example of how to achieve this.
  *
- * ## Use cases
- *  1. To replace very large arrays (10's or 100's of thousands of elements).
- *  2. Implementing a FIFO queue (i.e. where you add elements at one end remove them from the other end).  This is slow for large arrays.
- *  3. Insert operations in the middle of the list (which is slow in large arrays).
+ * ## Unit tests
+ * This package includes unit tests that demonstrate operational and speed test results clearly.  The push test, however,
+ * requires you to start node with `--expose-gc`, therfore, it is disabled.
+ *
+ * The tests show 3 orders of magnitude speed increase over Array for shift and unshift, which is significant for large arrays.
  *
  * ## Examples
  *  ```typescript
