@@ -6,6 +6,10 @@
   "author": "Russell Robinson <russellr@openconcepts.com.au>",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/russellrobinson/generic-linked-list.git"
+  },
   "scripts": {
     "test": "run-s build test:with-coverage",
     "test:with-coverage": "run-s test:unit:clean-coverage test:unit:with-coverage",
