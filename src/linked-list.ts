@@ -147,6 +147,7 @@ type IterationFunction<T> = (value: T, index: number) => boolean;
  * See: https://stackoverflow.com/questions/18215899/get-type-of-generic-parameter
  * However, it only works if you can create an instance of T, and there's no way to achieve that.
  */
+
 // type GetLinkedListT<C extends LinkedList<unknown>> = C extends LinkedList<infer T> ? T : unknown;
 
 /**
@@ -197,7 +198,7 @@ type IterationFunction<T> = (value: T, index: number) => boolean;
  *
  * ## Unit tests
  * This package includes unit tests that demonstrate operational and speed test results clearly.  The push test, however,
- * requires you to start node with `--expose-gc`, therfore, it is disabled.
+ * requires you to start node with `--expose-gc`, therefore, it is disabled.
  *
  * The tests show 3 orders of magnitude speed increase over Array for shift and unshift, which is significant for large arrays.
  *
@@ -416,7 +417,7 @@ export class LinkedList<T> implements Iterable<T> {
    * @param thisArg   a "this" value to bind to the predicate function
    * @returns the found element or undefined if not found
    *
-   * #### Complexity: O(n) where n is the size of the linked list
+   * #### Complexity: O(n) where n is the length of the linked list
    */
   public find(predicate: LinkedListPredicate<T>, thisArg?: any): T | undefined {
     let result: T | undefined = undefined;
@@ -435,7 +436,7 @@ export class LinkedList<T> implements Iterable<T> {
    * @param thisArg   a "this" value to bind to the predicate function
    * @returns the position in the list of the found element or -1 if not found
    *
-   * #### Complexity: O(n) where n is the size of the linked list
+   * #### Complexity: O(n) where n is the length of the linked list
    */
   public findIndex(predicate: LinkedListPredicate<T>, thisArg?: any): number {
     let result: number = -1;
@@ -454,7 +455,7 @@ export class LinkedList<T> implements Iterable<T> {
    * @param fromIndex   the index from which to start the search; -ve numbers are not supported and throw an exception
    * @returns the index of the first list element that is === to testValue, or -1 if no such list element is found
    *
-   * #### Complexity: O(n) where n is the size of the linked list
+   * #### Complexity: O(n) where n is the length of the linked list
    */
   public indexOf(testValue: T, fromIndex = 0): number {
     let result: number = -1;
@@ -499,7 +500,7 @@ export class LinkedList<T> implements Iterable<T> {
    * @param fromIndex   the index from which to start the search; -ve numbers are not supported and throw an exception
    * @returns `true` if the list includes the given value
    *
-   * #### Complexity: O(n) where n is the size of the linked list
+   * #### Complexity: O(n) where n is the length of the linked list
    */
   public includes(testValue: T, fromIndex = 0): boolean {
     let result = false;
@@ -525,7 +526,7 @@ export class LinkedList<T> implements Iterable<T> {
    * @param thisArg     a "this" value to bind to the predicate function
    * @returns a new linked list with just the elements that satisfied the predicate
    *
-   * #### Complexity: O(n) where n is the size of the linked list
+   * #### Complexity: O(n) where n is the length of the linked list
    */
   public filter(predicate: LinkedListPredicate<T>, thisArg?: any): LinkedList<T> {
     const result = new LinkedList<T>();
@@ -551,7 +552,8 @@ export class LinkedList<T> implements Iterable<T> {
    *
    * Getting the first element in the queue is instant.
    *
-   * @returns the element at the given index or `undefined`
+   * @returns the element at the given index or `undefined` if the index is beyond the end of the list. `at(0)` will
+   * return `undefined` if the list is empty
    *
    * #### Complexity: O(n) where n is the index you've requested.
    */
@@ -574,7 +576,7 @@ export class LinkedList<T> implements Iterable<T> {
    * @param thisArg     a "this" value to bind to the callback function
    * @returns the linked list itself
    *
-   * #### Complexity: O(n) where n is the size of the linked list
+   * #### Complexity: O(n) where n is the length of the linked list
    */
   public forEach(callback: LinkedListCallback<T>, thisArg?: any): LinkedList<T> {
     const callCallback = callback.bind(thisArg);
@@ -593,7 +595,7 @@ export class LinkedList<T> implements Iterable<T> {
    * @param thisArg     a "this" value to bind to the predicate function
    * @returns `true` if all elements obey the predicate, otherwise `false`
    *
-   * #### Complexity: O(n) where n is the size of the linked list
+   * #### Complexity: O(n) where n is the length of the linked list
    */
   public every(predicate: LinkedListPredicate<T>, thisArg?: any): boolean {
     let result: boolean = true;       // return true on an empty list
@@ -618,7 +620,7 @@ export class LinkedList<T> implements Iterable<T> {
    * @param thisArg     a "this" value to bind to the predicate function
    * @returns `true` if at least one element obeys the predicate, otherwise false
    *
-   * #### Complexity: O(n) where n is the size of the linked list
+   * #### Complexity: O(n) where n is the length of the linked list
    */
   public some(predicate: LinkedListPredicate<T>, thisArg?: any): boolean {
     let result: boolean = false;       // return false on an empty list
@@ -656,7 +658,40 @@ export class LinkedList<T> implements Iterable<T> {
   }
 
   /**
+   * Return a shallow copy of a part of the linked list, based on indexes of the elements in the list.
+   * @param start optional zero-based starting index, at which to start copying the list
+   * @param end   optional; the index of the first element to exclude from the returned list
+   * @returns a new list containing the specified elements from the original list
+   *
+   * #### Complexity: O(n) where n is the length of the linked list
+   */
+  public slice(start?: number, end?: number): LinkedList<T> {
+    const newList = new LinkedList<T>();
+
+    const fromIndex = start ?? 0;
+    const toIndex = Math.min(end ?? this.length, this.length);
+
+    if (fromIndex < 0 || toIndex < 0) {
+      throw Error('LinkedList.slice does not support a negative indexes');
+    }
+
+    let currIndex = 0;
+
+    for (const value of this) {
+      if (currIndex === toIndex) {
+        break;
+      }
+      if (currIndex++ >= fromIndex) {
+        newList.push(value);
+      }
+    }
+    return newList;
+  }
+
+  /**
    * Return a string representation of the list and its elements
+   *
+   * #### Complexity: O(n) where n is the length of the linked list
    */
   public toString(): string {
     const valueList: string[] = [];
@@ -668,6 +703,16 @@ export class LinkedList<T> implements Iterable<T> {
     return valueList.join(',');
   }
 
+  /**
+   * Return the last element in the list.
+   * @returns the last element in the list or undefined if the list is empty
+   *
+   * #### Complexity: O(1)
+   */
+  public end(): T | undefined {
+    return this._end === undefined ? undefined : this._end.value;
+  }
+
   /* TODO
    lastIndexOf - probably only for DoublyLinkedList
    map
@@ -677,7 +722,5 @@ export class LinkedList<T> implements Iterable<T> {
    from
    reduce
    reduceRight
-   slice
-   toString
    */
 }

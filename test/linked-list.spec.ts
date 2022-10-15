@@ -311,6 +311,7 @@ describe('linked-list', () => {
         const dupList = new LinkedList<number>(origList);
 
         expect(dupList.length).to.equal(origList.length);
+        expect(dupList === origList).to.be.false;         // not a reference to the original
 
         let origIter = origList[Symbol.iterator]();
         let dupIter = dupList[Symbol.iterator]();
@@ -339,11 +340,12 @@ describe('linked-list', () => {
             expect(value).to.equal(fixture[index]);
             index++;
           }
+          expect(index).to.equal(fixture.length);
         }
 
         compare(arr.values());
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         compare(list.values());
       });
     });
@@ -373,28 +375,42 @@ describe('linked-list', () => {
       });
     });
 
+    describe('end', () => {
+      it('returns the last element in a list', () => {
+        const fixture: number[] = [1, 2, 3, 4];
+        const list = new LinkedList<number>(fixture);
+
+        expect(list.end()).to.equal(4);
+      });
+      it('returns undefined if the list is empty', () => {
+        const list = new LinkedList();
+
+        expect(list.end()).to.be.undefined;
+      });
+    });
+
     describe('indexOf', () => {
       it('finds a matching element just like Array', () => {
-        const arr = [1, 2, 3, 4];
-        expect(arr.indexOf(2)).to.equal(1);
+        const fixture = [1, 2, 3, 4];
+        expect(fixture.indexOf(2)).to.equal(1);
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         expect(list.indexOf(2)).to.equal(1);
       });
       it('accepts the fromIndex just like Array (except for  -ve indexes)', () => {
-        const arr = [1, 2, 3, 4, 2, 2];
-        expect(arr.indexOf(2, 3)).to.equal(4);
+        const fixture = [1, 2, 3, 4, 2, 2];
+        expect(fixture.indexOf(2, 3)).to.equal(4);
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         expect(list.indexOf(2, 3)).to.equal(4);
 
         expect(() => list.indexOf(2, -1)).to.throw();
       });
       it('returns -1 with no matching element just like Array', () => {
-        const arr = [1, 2, 3, 4];
-        expect(arr.indexOf(5)).to.equal(-1);
+        const fixture = [1, 2, 3, 4];
+        expect(fixture.indexOf(5)).to.equal(-1);
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         expect(list.indexOf(5)).to.equal(-1);
       });
       it('returns -1 with empty list just like Array', () => {
@@ -409,74 +425,85 @@ describe('linked-list', () => {
         //
         // strict equality doesn't work with objects - they must be the same object
         //
-        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
-        expect(arr.indexOf({a: 2, b: 2})).to.equal(-1);
+        const fixture: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        expect(fixture.indexOf({a: 2, b: 2})).to.equal(-1);
 
-        const list = new LinkedList<Obj>(arr);
+        const list = new LinkedList<Obj>(fixture);
         expect(list.indexOf({a: 2, b: 2})).to.equal(-1);
 
         //
         // So, now we test with the actual object, and it works
         //
-        expect(arr.indexOf(arr[1])).to.equal(1);
-        expect(list.indexOf(arr[1])).to.equal(1);
+        expect(fixture.indexOf(fixture[1])).to.equal(1);
+        expect(list.indexOf(fixture[1])).to.equal(1);
       });
       it('finds first matching only just like Array', () => {
-        const arr = [1, 2, 3, 4, 2];
-        expect(arr.indexOf(2)).to.equal(1);
+        const fixture = [1, 2, 3, 4, 2];
+        expect(fixture.indexOf(2)).to.equal(1);
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         expect(list.indexOf(2)).to.equal(1);
       });
     });
     describe('concat', () => {
       it('concatenates just like Array', () => {
-        const arr = [1, 2, 3, 4];
-        const arrResult = arr.concat(2);
-        const arrExpected = [1, 2, 3, 4, 2];
-        expect(arrResult).to.deep.equal(arrExpected);
+        const fixture = [1, 2, 3, 4];
+        const arrResult = fixture.concat(2);
+        const expectedResultFixture = [1, 2, 3, 4, 2];
+        expect(arrResult).to.deep.equal(expectedResultFixture);
+        expect(arrResult === fixture).to.be.false;         // not a reference to the original
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         const listResult = list.concat(2);
-        const listExpected = new LinkedList<number>(arrExpected);
+        const listResultExpected = new LinkedList<number>(expectedResultFixture);
 
-        expectEqual(listResult, listExpected);
+        expectEqual(listResult, listResultExpected);
+        expect(listResult === list).to.be.false;         // not a reference to the original
       });
       it('accepts no parameters just like Array', () => {
-        const arr = [1, 2, 3, 4];
-        const arrResult = arr.concat();
-        const arrExpected = [1, 2, 3, 4];
-        expect(arrResult).to.deep.equal(arrExpected);
+        const fixture = [1, 2, 3, 4];
+        const arrResult = fixture.concat();
+        const expectedResultFixture = [1, 2, 3, 4];
+        expect(arrResult).to.deep.equal(expectedResultFixture);
+        expect(arrResult === fixture).to.be.false;         // not a reference to the original
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         const listResult = list.concat();
-        const listExpected = new LinkedList<number>(arrExpected);
+        const listResultExpected = new LinkedList<number>(expectedResultFixture);
 
-        expectEqual(listResult, listExpected);
+        expectEqual(listResult, listResultExpected);
+        expect(listResult === list).to.be.false;         // not a reference to the original
+
       });
       it('accepts multiple parameters just like Array', () => {
-        const arr = [1, 2, 3, 4];
-        const arrResult = arr.concat(5, 2, 1, NaN);
-        const arrExpected = [1, 2, 3, 4, 5, 2, 1, NaN];
-        expect(arrResult).to.deep.equal(arrExpected);
+        const fixture = [1, 2, 3, 4];
+        const arrResult = fixture.concat(5, 2, 1, NaN);
+        const expectedResultFixture = [1, 2, 3, 4, 5, 2, 1, NaN];
+        expect(arrResult).to.deep.equal(expectedResultFixture);
+        expect(arrResult === fixture).to.be.false;         // not a reference to the original
 
-        const list = new LinkedList<number>(arr);
+
+        const list = new LinkedList<number>(fixture);
         const listResult = list.concat(5, 2, 1, NaN);
-        const listExpected = new LinkedList<number>(arrExpected);
+        const listResultExpected = new LinkedList<number>(expectedResultFixture);
 
-        expectEqual(listResult, listExpected);
+        expectEqual(listResult, listResultExpected);
+        expect(listResult === list).to.be.false;         // not a reference to the original
+
       });
       it('accepts list parameters just like Array accepts arrays', () => {
-        const arr = [1, 2, 3, 4];
-        const arrResult = arr.concat(5, [2, 3], 1, [NaN, 0]);
-        const arrExpected = [1, 2, 3, 4, 5, 2, 3, 1, NaN, 0];
-        expect(arrResult).to.deep.equal(arrExpected);
+        const fixture = [1, 2, 3, 4];
+        const arrResult = fixture.concat(5, [2, 3], 1, [NaN, 0]);
+        const expectedResultFixture = [1, 2, 3, 4, 5, 2, 3, 1, NaN, 0];
+        expect(arrResult).to.deep.equal(expectedResultFixture);
+        expect(arrResult === fixture).to.be.false;         // not a reference to the original
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         const listResult = list.concat(5, new LinkedList([2, 3]), 1, new LinkedList([NaN, 0]));
-        const listExpected = new LinkedList<number>(arrExpected);
+        const listResultExpected = new LinkedList<number>(expectedResultFixture);
 
-        expectEqual(listResult, listExpected);
+        expectEqual(listResult, listResultExpected);
+        expect(listResult === list).to.be.false;         // not a reference to the original
       });
       it('performs shallow copy just like Array', () => {
         type LocalObj = Obj & { c?: { c1: number, c2: string } };      // extend Obj for this test
@@ -537,34 +564,34 @@ describe('linked-list', () => {
     });
     describe('includes', () => {
       it('finds a matching element just like Array', () => {
-        const arr = [1, 2, 3, 4];
-        expect(arr.includes(2)).to.be.true;
+        const fixture = [1, 2, 3, 4];
+        expect(fixture.includes(2)).to.be.true;
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         expect(list.includes(2)).to.be.true;
       });
       it('accepts the fromIndex just like Array (except for  -ve indexes)', () => {
-        const arr = [1, 2, 3, 4, 2, 2];
-        expect(arr.includes(2, 3)).to.be.true;
-        expect(arr.includes(3, 3)).to.be.false;
+        const fixture = [1, 2, 3, 4, 2, 2];
+        expect(fixture.includes(2, 3)).to.be.true;
+        expect(fixture.includes(3, 3)).to.be.false;
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         expect(list.includes(2, 3)).to.be.true;
-        expect(arr.includes(3, 3)).to.be.false;
+        expect(fixture.includes(3, 3)).to.be.false;
 
         expect(() => list.includes(2, -1)).to.throw();
       });
       it('returns false with no matching element just like Array', () => {
-        const arr = [1, 2, 3, 4];
-        expect(arr.includes(5)).to.be.false;
+        const fixture = [1, 2, 3, 4];
+        expect(fixture.includes(5)).to.be.false;
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         expect(list.includes(5)).to.be.false;
       });
       it('returns false with empty list just like Array', () => {
         // noinspection JSMismatchedCollectionQueryUpdate
-        const arr: number[] = [];
-        expect(arr.includes(1)).to.be.false;
+        const fixture: number[] = [];
+        expect(fixture.includes(1)).to.be.false;
 
         const list = new LinkedList<number>();
         expect(list.includes(1)).to.be.false;
@@ -573,107 +600,107 @@ describe('linked-list', () => {
         //
         // strict equality doesn't work with objects - they must be the same object
         //
-        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
-        expect(arr.includes({a: 2, b: 2})).to.be.false;
+        const fixture: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        expect(fixture.includes({a: 2, b: 2})).to.be.false;
 
-        const list = new LinkedList<Obj>(arr);
+        const list = new LinkedList<Obj>(fixture);
         expect(list.includes({a: 2, b: 2})).to.be.false;
 
         //
         // So, now we test with the actual object, and it works
         //
-        expect(arr.includes(arr[1])).to.be.true;
-        expect(list.includes(arr[1])).to.be.true;
+        expect(fixture.includes(fixture[1])).to.be.true;
+        expect(list.includes(fixture[1])).to.be.true;
       });
       it('finds NaN just like Array', () => {
-        const arr = [1, NaN, 3, 4, 2];
-        expect(arr.includes(NaN)).to.be.true;
+        const fixture = [1, NaN, 3, 4, 2];
+        expect(fixture.includes(NaN)).to.be.true;
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         expect(list.includes(NaN)).to.be.true;
       });
       it('finds no NaN just like Array', () => {
-        const arr = [1, 3, 4, 2];
-        expect(arr.includes(NaN)).to.be.false;
+        const fixture = [1, 3, 4, 2];
+        expect(fixture.includes(NaN)).to.be.false;
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         expect(list.includes(NaN)).to.be.false;
       });
       it('finds undefined just like Array', () => {
-        const arr = [1, undefined, 3, 4, 2];
-        expect(arr.includes(undefined)).to.be.true;
+        const fixture = [1, undefined, 3, 4, 2];
+        expect(fixture.includes(undefined)).to.be.true;
 
-        const list = new LinkedList<unknown>(arr);
+        const list = new LinkedList<unknown>(fixture);
         expect(list.includes(undefined)).to.be.true;
       });
       it('finds null just like Array', () => {
-        const arr = [1, null, 3, 4, 2];
-        expect(arr.includes(null)).to.be.true;
+        const fixture = [1, null, 3, 4, 2];
+        expect(fixture.includes(null)).to.be.true;
 
-        const list = new LinkedList<unknown>(arr);
+        const list = new LinkedList<unknown>(fixture);
         expect(list.includes(null)).to.be.true;
       });
     });
     describe('find & findIndex', () => {
       it('finds a matching element just like Array', () => {
-        const arr = [1, 2, 3, 4];
+        const fixture = [1, 2, 3, 4];
         const pred = value => value === 2;
 
-        expect(arr.find(pred)).to.equal(2);
-        expect(arr.findIndex(pred)).to.equal(1);
+        expect(fixture.find(pred)).to.equal(2);
+        expect(fixture.findIndex(pred)).to.equal(1);
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
 
         expect(list.find(pred)).to.equal(2);
         expect(list.findIndex(pred)).to.equal(1);
       });
       it('returns undefined with no matching element just like Array', () => {
-        const arr = [1, 2, 3, 4];
+        const fixture = [1, 2, 3, 4];
         const pred = value => value === 5;
 
-        expect(arr.find(pred)).to.be.undefined;
-        expect(arr.findIndex(pred)).to.equal(-1);
+        expect(fixture.find(pred)).to.be.undefined;
+        expect(fixture.findIndex(pred)).to.equal(-1);
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
 
         expect(list.find(pred)).to.be.undefined;
         expect(list.findIndex(pred)).to.equal(-1);
       });
       it('finds first matching only just like Array', () => {
-        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        const fixture: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
         const pred = value => value.a === 2;
 
-        expect(arr.find(pred)).to.deep.equal({a: 2, b: 2});
-        expect(arr.findIndex(pred)).to.equal(1);
+        expect(fixture.find(pred)).to.deep.equal({a: 2, b: 2});
+        expect(fixture.findIndex(pred)).to.equal(1);
 
-        const list = new LinkedList<Obj>(arr);
+        const list = new LinkedList<Obj>(fixture);
 
         expect(list.find(pred)).to.deep.equal({a: 2, b: 2});
         expect(list.findIndex(pred)).to.equal(1);
       });
       it('provides an index parameter to the predicate just like Array', () => {
-        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        const fixture: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
         const pred = (value, index) => value.a === 2 && index > 1;
 
-        expect(arr.find(pred)).to.deep.equal({a: 2, b: 'x'});
-        expect(arr.findIndex(pred)).to.equal(3);
+        expect(fixture.find(pred)).to.deep.equal({a: 2, b: 'x'});
+        expect(fixture.findIndex(pred)).to.equal(3);
 
-        const list = new LinkedList<Obj>(arr);
+        const list = new LinkedList<Obj>(fixture);
 
         expect(list.find(pred)).to.deep.equal({a: 2, b: 'x'});
         expect(list.findIndex(pred)).to.equal(3);
       });
       it('provides the list parameter to the predicate just like Array', () => {
-        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        const fixture: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
         const arrPred = (value, index, theArray) => value.a === 2 && theArray[index].b === 'x';
 
-        expect(arr.find(arrPred)).to.deep.equal({
+        expect(fixture.find(arrPred)).to.deep.equal({
           a: 2,
           b: 'x'
         });
-        expect(arr.findIndex(arrPred)).to.equal(3);
+        expect(fixture.findIndex(arrPred)).to.equal(3);
 
-        const list = new LinkedList<Obj>(arr);
+        const list = new LinkedList<Obj>(fixture);
         const listPred = (value, index, theList) => {
           let result = false;
 
@@ -710,12 +737,12 @@ describe('linked-list', () => {
     });
     describe('filter', () => {
       it('filters to matching elements just like Array', () => {
-        const arr = [1, 2, 3, 4, 2, 5, 2, 6, 2, 7];
+        const fixture = [1, 2, 3, 4, 2, 5, 2, 6, 2, 7];
         const pred = value => value === 2;
 
-        expect(arr.filter(pred)).to.deep.equal([2, 2, 2, 2]);
+        expect(fixture.filter(pred)).to.deep.equal([2, 2, 2, 2]);
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         const result = list.filter(pred);
 
         expect(result.length).to.equal(4);
@@ -724,36 +751,36 @@ describe('linked-list', () => {
         }
       });
       it('returns empty list with no matching element just like Array', () => {
-        const arr = [1, 2, 3, 4];
+        const fixture = [1, 2, 3, 4];
         const pred = value => value === 5;
 
-        expect(arr.filter(pred).length).to.equal(0);
+        expect(fixture.filter(pred).length).to.equal(0);
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
 
         expect(list.filter(pred).length).to.equal(0);
       });
       it('provides an index parameter to the predicate just like Array', () => {
-        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        const fixture: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
         const pred = (value, index) => value.a === 2 && index > 1;
 
-        expect(arr.filter(pred)).to.deep.equal([{a: 2, b: 'x'}]);
+        expect(fixture.filter(pred)).to.deep.equal([{a: 2, b: 'x'}]);
 
-        const list = new LinkedList<Obj>(arr);
+        const list = new LinkedList<Obj>(fixture);
         const result = list.filter(pred);
         const expected = new LinkedList<Obj>([{a: 2, b: 'x'}]);
 
         expectEqual(result, expected);
       });
       it('provides the list parameter to the predicate just like Array', () => {
-        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        const fixture: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
 
-        expect(arr.filter((value, index, theArray) => value.a === 2 && theArray[index].b === 'x')).to.deep.equal([{
+        expect(fixture.filter((value, index, theArray) => value.a === 2 && theArray[index].b === 'x')).to.deep.equal([{
           a: 2,
           b: 'x'
         }]);
 
-        const list = new LinkedList<Obj>(arr);
+        const list = new LinkedList<Obj>(fixture);
         const expected = new LinkedList<Obj>([{a: 2, b: 'x'}]);
         const result = list.filter((value, index, theList) => {
           let result = false;
@@ -791,49 +818,49 @@ describe('linked-list', () => {
     });
     describe('every', () => {
       it('returns true if every element matches the predicate, just like Array', () => {
-        const arr = [1, 2, 3, 4];
+        const fixture = [1, 2, 3, 4];
         const pred = value => value < 5;
 
-        expect(arr.every(pred)).to.be.true;
+        expect(fixture.every(pred)).to.be.true;
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         expect(list.every(pred)).to.be.true;
       });
       it('returns false if one element does not match the predicate, just like Array', () => {
-        const arr = [1, 2, 3, 4];
+        const fixture = [1, 2, 3, 4];
         const pred = value => value === 1;
 
-        expect(arr.every(pred)).to.be.false;
+        expect(fixture.every(pred)).to.be.false;
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         expect(list.every(pred)).to.be.false;
       });
       it('returns true on empty list just like Array', () => {
-        const arr = [];
+        const fixture = [];
         const pred = value => value === 5;
 
-        expect(arr.every(pred)).to.be.true;
+        expect(fixture.every(pred)).to.be.true;
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         expect(list.every(pred)).to.be.true;
 
       });
       it('provides an index parameter to the predicate just like Array', () => {
-        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        const fixture: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
         const pred = (value, index) => _.isNumber(value.b) || index === 3;
 
-        expect(arr.every(pred)).to.be.true;
+        expect(fixture.every(pred)).to.be.true;
 
-        const list = new LinkedList<Obj>(arr);
+        const list = new LinkedList<Obj>(fixture);
         expect(list.every(pred)).to.be.true;
       });
       it('provides the list parameter to the predicate just like Array', () => {
-        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        const fixture: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
         const arrPred = (value, index, theArray) => _.isNumber(theArray[index].b) || theArray[index].b === 'x';
 
-        expect(arr.every(arrPred)).to.be.true;
+        expect(fixture.every(arrPred)).to.be.true;
 
-        const list = new LinkedList<Obj>(arr);
+        const list = new LinkedList<Obj>(fixture);
         const listPred = (value, index, theList) => _.isNumber(theList.at(index).b) || theList.at(index).b === 'x';
         expect(list.every(listPred)).to.be.true;
       });
@@ -856,30 +883,30 @@ describe('linked-list', () => {
     });
     describe('some', () => {
       it('returns true if an element matches the predicate, just like Array', () => {
-        const arr = [1, 2, 3, 4];
+        const fixture = [1, 2, 3, 4];
         const pred = value => value == 3;
 
-        expect(arr.some(pred)).to.be.true;
+        expect(fixture.some(pred)).to.be.true;
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         expect(list.some(pred)).to.be.true;
       });
       it('returns false if no element matches the predicate, just like Array', () => {
-        const arr = [1, 2, 3, 4];
+        const fixture = [1, 2, 3, 4];
         const pred = value => value === 5;
 
-        expect(arr.some(pred)).to.be.false;
+        expect(fixture.some(pred)).to.be.false;
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         expect(list.some(pred)).to.be.false;
       });
       it('returns false on empty list just like Array', () => {
-        const arr = [];
+        const fixture = [];
         const pred = value => value === 5;
 
-        expect(arr.some(pred)).to.be.false;
+        expect(fixture.some(pred)).to.be.false;
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         expect(list.some(pred)).to.be.false;
 
       });
@@ -893,12 +920,12 @@ describe('linked-list', () => {
         expect(list.some(pred)).to.be.true;
       });
       it('provides the list parameter to the predicate just like Array', () => {
-        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        const fixture: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
         const arrPred = (value, index, theArray) => _.isNumber(theArray[index].b) || theArray[index].b === 'x';
 
-        expect(arr.some(arrPred)).to.be.true;
+        expect(fixture.some(arrPred)).to.be.true;
 
-        const list = new LinkedList<Obj>(arr);
+        const list = new LinkedList<Obj>(fixture);
         const listPred = (value, index, theList) => _.isNumber(theList.at(index).b) || theList.at(index).b === 'x';
         expect(list.some(listPred)).to.be.true;
       });
@@ -922,58 +949,58 @@ describe('linked-list', () => {
     });
     describe('forEach', () => {
       it('calls the callback on every element just like Array', () => {
-        const arr = [1, 2, 3, 4];
+        const fixture = [1, 2, 3, 4];
         let result = 0;
 
         function sum(value) {
           result += value;
         }
 
-        arr.forEach(sum);
+        fixture.forEach(sum);
         expect(result).to.equal(10);
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
         result = 0;
         list.forEach(sum);
         expect(result).to.equal(10);
       });
       it('does nothing on an empty list, just like Array', () => {
-        const arr = [];
+        const fixture = [];
         let result = true;
 
         function cb() {
           result = false;
         }
 
-        arr.forEach(cb);
+        fixture.forEach(cb);
         expect(result).to.be.true;
 
-        const list = new LinkedList<number>(arr);
+        const list = new LinkedList<number>(fixture);
 
         list.forEach(cb);
         expect(result).to.be.true;
       });
       it('provides an index parameter to the callback, just like Array', () => {
-        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        const fixture: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
         let result = -1;
 
-        arr.forEach((value, index) => result = index);
+        fixture.forEach((value, index) => result = index);
         expect(result).to.equal(3);
 
-        const list = new LinkedList<Obj>(arr);
+        const list = new LinkedList<Obj>(fixture);
 
         result = -1;
         list.forEach((value, index) => result = index);
         expect(result).to.equal(3);
       });
       it('provides the list parameter to the predicate just like Array', () => {
-        const arr: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
+        const fixture: Obj[] = [{a: 1, b: 2}, {a: 2, b: 2}, {a: 3, b: 3}, {a: 2, b: 'x'}];
         let result: number | string = -1;
 
-        arr.forEach((value, index, theArray) => result = theArray[index].b);
+        fixture.forEach((value, index, theArray) => result = theArray[index].b);
         expect(result).to.equal('x');
 
-        const list = new LinkedList<Obj>(arr);
+        const list = new LinkedList<Obj>(fixture);
         result = -1;
         list.forEach((value, index, theList) => {
           const indexValue = theList.at(index);
@@ -1006,233 +1033,470 @@ describe('linked-list', () => {
         expect(result).to.equal('x');
       });
     });
+    describe('slice', () => {
+      const fixture: number[] = [1, 2, 3, 4];
 
-    describe('linked list speed', () => {
-      //
-      // Linked list is much faster for unshift than array on large lengths
-      //
-      it('inserts (unshifts) faster than arrays', function () {
-        this.timeout(20_000);   // event loop is blocked, so this only affects the end
-        const count = 300_000;
-        const speedFactor = 200;      //  much faster than this, but affected by coverage
+      function compare<T>(iter: IterableIterator<T>, fixture: T[]) {
+        let index = 0;
+        for (const value of iter) {
+          expect(value).to.equal(fixture[index]);
+          index++;
+        }
+        expect(index).to.equal(fixture.length);
+      }
 
-        const runList = (): number => {
-          //
-          // measure list insert
-          //
-          const start = hrtime.bigint();
-          const list = unshiftList(count, returnCount);
-          const end = hrtime.bigint();
+      it('slices the original', () => {
+        const arr = new Array<number>(...fixture);
 
-          expect(list.length).to.equal(count);
+        const arrSlice = arr.slice(1, 3);
+        expect(arrSlice === arr).to.be.false;     // not a reference to the original
+        compare(arrSlice[Symbol.iterator](), [fixture[1], fixture[2]]);
 
-          return toMilli(Number(end - start));  // return milliseconds
-        };
-
-        const runArray = (): number => {
-          //
-          // measure array insert
-          //
-          const start = hrtime.bigint();
-          const arr = unshiftArray(count, returnCount);
-          const end = hrtime.bigint();
-
-          expect(arr.length).to.equal(count);
-
-          return toMilli(Number(end - start));  // return milliseconds
-        };
-
-        const listTimeMs = runList();
-        const arrayTimeMs = runArray();
-
-        console.log(`Array is ${(arrayTimeMs / listTimeMs).toFixed(1)} times slower than LinkedList for unshift`);
-        expect(arrayTimeMs / listTimeMs).to.be.greaterThan(speedFactor);
+        const list = new LinkedList<number>([...fixture]);
+        const listSlice = list.slice(1, 3);
+        expect(listSlice === list).to.be.false;   // not a reference to the original
+        compare(listSlice[Symbol.iterator](), [fixture[1], fixture[2]]);
       });
 
-      //
-      // Linked list is much faster for shift retrieval than the equivalent array with large lengths
-      //
-      it('retrieves (shifts) much faster than arrays', function () {
-        this.timeout(20_000);   // event loop is blocked, so this only affects the end
-        const count = 200_000;
-        const speedFactor = 250;   // much faster than this, but affected by coverage
+      it('returns a new empty list from an empty list', () => {
+        const arr = new Array<number>();
 
-        const runList = (): number => {
-          const list = pushList(count, returnCount);     // build the list quickly
+        const arrSlice = arr.slice();
+        expect(arrSlice === arr).to.be.false;     // not a reference to the original
+        expect(arrSlice.length).to.equal(0);
 
-          //
-          // measure shift retrieval
-          //
-          const start = hrtime.bigint();
-          for (let ii = 0; ii < count; ii++) {
-            list.shift();
-          }
-          const end = hrtime.bigint();
-          expect(list.length).to.equal(0);
-
-          return toMilli(Number(end - start));  // return milliseconds
-        };
-
-        const runArray = (): number => {
-          const arr = pushArray(count, returnCount);     // build the array quickly
-
-          //
-          // measure shift retrieval
-          //
-          const start = hrtime.bigint();
-          for (let ii = 0; ii < count; ii++) {
-            arr.shift();
-          }
-          const end = hrtime.bigint();
-          expect(arr.length).to.equal(0);
-
-          return toMilli(Number(end - start));  // return milliseconds
-
-        };
-
-        const listTimeMs = runList();
-        const arrayTimeMs = runArray();
-
-        console.log(`Array is ${(arrayTimeMs / listTimeMs).toFixed(1)} times slower than LinkedList for shift retrieval`);
-        expect(arrayTimeMs / listTimeMs).to.be.greaterThan(speedFactor);
+        const list = new LinkedList<number>();
+        const listSlice = list.slice();
+        expect(listSlice === list).to.be.false;   // not a reference to the original
+        expect(listSlice.length).to.equal(0);
       });
 
-      //
-      // Array is very fast for push, but slows down when the objects being pushed are large.
-      // This test shows that LinkedList is comparable to array in time and memory use when the elements are
-      // > 500 bytes in size and the array or list length is several hundred thousand.
-      //
-      // To run this test, you must start node with: --expose-gc
-      // If you want to test with bigger numbers, you may also need: --max-old-space-size=20000
-      //
-      // This test is disabled because it's not reliable; the garbage collector (GC), the nyc coverage logic,
-      // and IDE bring in confounding factors especially when run with previous tests.
-      //
-      // However, you can enable and play with it.
-      //
-      xit('is comparable to array for pushing large elements on long lists/arrays', function () {
-        this.timeout(80_000);   // event loop is blocked, so this only affects the end
+      it('returns a copy if no parameters are given', () => {
+        const arr = new Array<number>(...fixture);
 
+        const arrSlice = arr.slice();
+        expect(arrSlice === arr).to.be.false;     // not a reference to the original
+        compare(arrSlice[Symbol.iterator](), fixture);
+
+        const list = new LinkedList<number>([...fixture]);
+        const listSlice = list.slice();
+        expect(listSlice === list).to.be.false;   // not a reference to the original
+        compare(listSlice[Symbol.iterator](), fixture);
+      });
+
+      it('returns a copy if start and end indexes are given', () => {
+        const arr = new Array<number>(...fixture);
+
+        const arrSlice = arr.slice(0, arr.length);
+        expect(arrSlice === arr).to.be.false;     // not a reference to the original
+        compare(arrSlice[Symbol.iterator](), fixture);
+
+        const list = new LinkedList<number>([...fixture]);
+        const listSlice = list.slice(0, list.length);
+        expect(listSlice === list).to.be.false;   // not a reference to the original
+        compare(listSlice[Symbol.iterator](), fixture);
+      });
+
+      it('does not return the last index given', () => {
+        const arr = new Array<number>(...fixture);
+
+        const arrSlice = arr.slice(0, 1);
+        compare(arrSlice[Symbol.iterator](), [fixture[0]]);
+
+        const list = new LinkedList<number>([...fixture]);
+        const listSlice = list.slice(0, 1);
+        compare(listSlice[Symbol.iterator](), [fixture[0]]);
+      });
+
+      describe('unusual start and end indexes', () => {
+        it('returns an empty result if the start >= end and is in the middle', () => {
+          const arr = new Array<number>(...fixture);
+
+          const arrSlice = arr.slice(2, 2);
+          expect(arrSlice === fixture).to.be.false;     // not a reference to the original
+          expect(arrSlice.length).to.equal(0);
+
+          const list = new LinkedList<number>([...fixture]);
+          const listSlice = list.slice(2, 2);
+          expect(listSlice === list).to.be.false;   // not a reference to the original
+          expect(listSlice.length).to.equal(0);
+        });
+        it('returns an empty result if the start >= end and is at the beginning', () => {
+          const arr = new Array<number>(...fixture);
+
+          const arrSlice = arr.slice(0, 0);
+          expect(arrSlice === fixture).to.be.false;     // not a reference to the original
+          expect(arrSlice.length).to.equal(0);
+
+          const list = new LinkedList<number>([...fixture]);
+          const listSlice = list.slice(0, 0);
+          expect(listSlice === list).to.be.false;   // not a reference to the original
+          expect(listSlice.length).to.equal(0);
+        });
+        it('returns an empty result if the start >= end and is at the end', () => {
+          const arr = new Array<number>(...fixture);
+
+          const arrSlice = arr.slice(arr.length, arr.length);
+          expect(arrSlice === fixture).to.be.false;     // not a reference to the original
+          expect(arrSlice.length).to.equal(0);
+
+          const list = new LinkedList<number>([...fixture]);
+          const listSlice = list.slice(list.length, list.length);
+          expect(listSlice === list).to.be.false;   // not a reference to the original
+          expect(listSlice.length).to.equal(0);
+        });
+        it('throws with negative indexes', () => {
+          const list = new LinkedList<number>([...fixture]);
+          expect(() => list.slice(2, -1)).to.throw();
+          expect(() => list.slice(-1, 2)).to.throw();
+        });
+      });
+
+      describe('shallow copy', () => {
+        it('returns shallow copies of objects', () => {
+          const fixture = [{a: 1, b: 2}, {c: 3, d: 4}, {e: 5, f: 6}];
+          const arr = new Array<Object>(...fixture);
+
+          const arrSlice = arr.slice(1, 2);
+          expect(arrSlice === arr).to.be.false;           // not a reference to the original
+          expect(arrSlice[0] === arr[1]).to.be.true;      // copies are references to the original
+
+          const list = new LinkedList<Object>([...fixture]);
+          const listSlice = list.slice(1, 2);
+          expect(listSlice === list).to.be.false;                       // not a reference to the original
+          expect(listSlice.at(0) === list.at(1)).to.be.true; // copies are references to the original
+        });
+      });
+    });
+
+    describe('linked list speed vs array speed', () => {
+      describe('unshift (insert)', () => {
         //
-        // These values provide the comparison; your results may vary depending on your computer's
-        // capabilities.
+        // Linked list is much faster for unshift than array on large lengths
         //
-        const slownessFactor = 1.5;     // list will be less than this much slower than array
-        const memoryFactor = 1.3;       // list will use less than this much more memory than array
-        const sizeThreshold = 500;      // this is the size at which LinkedList becomes comparable to array
-        const startCount = 50_000;      // start with a list/array of this size
-        const measureCount = 400_000;   // and add this many more elements
-        const repeats = 10;             // repeat this many times to average results
+        it('inserts (unshifts) faster than arrays', function () {
+          this.timeout(20_000);   // event loop is blocked, so this only affects the end
+          const count = 300_000;
+          const speedFactor = 200;      //  much faster than this, but affected by coverage
 
-        const obj = {
-          hello: 'world',
-          mesg: 'My dog has fleas',
-          num: 424242,
-          x: 'x'.repeat(sizeThreshold)
-        };
+          const runList = (): number => {
+            //
+            // measure list insert
+            //
+            const start = hrtime.bigint();
+            const list = unshiftList(count, returnCount);
+            const end = hrtime.bigint();
 
-        const makeObject: makeFn<Object> = (count: number) => {
-          return {...obj, n: count};
-          // return {...obj, xs: 'x'.repeat(count % 200)};
-        };
+            expect(list.length).to.equal(count);
 
-        const runList = (list: LinkedList<Object>): number => {
-          const startLen = list.length;
-          expect(startLen).to.equal(startCount);
+            return toMilli(Number(end - start));  // return milliseconds
+          };
 
-          const start = hrtime.bigint();
-          pushList(measureCount, makeObject, list);
-          const end = hrtime.bigint();
+          const runArray = (): number => {
+            //
+            // measure array insert
+            //
+            const start = hrtime.bigint();
+            const arr = unshiftArray(count, returnCount);
+            const end = hrtime.bigint();
 
-          expect(list.length).to.equal(startLen + measureCount);
+            expect(arr.length).to.equal(count);
 
-          return toMilli(Number(end - start));  // return milliseconds
-        };
+            return toMilli(Number(end - start));  // return milliseconds
+          };
 
-        const runArray = (arr: Object[]): number => {
-          const startLen = arr.length;
-          expect(startLen).to.equal(startCount);
+          const listTimeMs = runList();
+          const arrayTimeMs = runArray();
 
-          const start = hrtime.bigint();
-          pushArray(measureCount, makeObject, arr);
-          const end = hrtime.bigint();
+          console.log(`Array is ${(arrayTimeMs / listTimeMs).toFixed(1)} times slower than LinkedList for unshift`);
+          expect(arrayTimeMs / listTimeMs).to.be.greaterThan(speedFactor);
+        });
+      });
 
-          expect(arr.length).to.equal(startLen + measureCount);
+      describe('shift (removal)', () => {
+        //
+        // Linked list is much faster for shift retrieval than the equivalent array with large lengths
+        //
+        it('retrieves (shifts) much faster than arrays', function () {
+          this.timeout(20_000);   // event loop is blocked, so this only affects the end
+          const count = 200_000;
+          const speedFactor = 250;   // much faster than this, but affected by coverage
 
-          return toMilli(Number(end - start));  // return milliseconds
-        };
+          const runList = (): number => {
+            const list = pushList(count, returnCount);     // build the list quickly
 
-        function forceGC() {
-          if (global.gc) {
-            global.gc();
+            //
+            // measure shift retrieval
+            //
+            const start = hrtime.bigint();
+            for (let ii = 0; ii < count; ii++) {
+              list.shift();
+            }
+            const end = hrtime.bigint();
+            expect(list.length).to.equal(0);
+
+            return toMilli(Number(end - start));  // return milliseconds
+          };
+
+          const runArray = (): number => {
+            const arr = pushArray(count, returnCount);     // build the array quickly
+
+            //
+            // measure shift retrieval
+            //
+            const start = hrtime.bigint();
+            for (let ii = 0; ii < count; ii++) {
+              arr.shift();
+            }
+            const end = hrtime.bigint();
+            expect(arr.length).to.equal(0);
+
+            return toMilli(Number(end - start));  // return milliseconds
+
+          };
+
+          const listTimeMs = runList();
+          const arrayTimeMs = runArray();
+
+          console.log(`Array is ${(arrayTimeMs / listTimeMs).toFixed(1)} times slower than LinkedList for shift retrieval`);
+          expect(arrayTimeMs / listTimeMs).to.be.greaterThan(speedFactor);
+        });
+      });
+      describe('slice', () => {
+        it('is much slower than array', function () {
+          this.timeout(20_000);   // event loop is blocked, so this only affects the end
+          const count = 80_000;
+          const speedFactor = 150;
+          const sliceSize = 1000;
+
+          const runList = (): number => {
+            const list = pushList(count, returnCount);     // build the list quickly
+
+            //
+            // measure slice retrieval
+            //
+            const start = hrtime.bigint();
+            for (let ii = 0; ii < count; ii++) {
+              list.slice(ii, ii + sliceSize);
+            }
+            const end = hrtime.bigint();
+
+            return toMilli(Number(end - start));  // return milliseconds
+          };
+
+          const runArray = (): number => {
+            const arr = pushArray(count, returnCount);     // build the array quickly
+
+            //
+            // measure slice retrieval
+            //
+            const start = hrtime.bigint();
+            for (let ii = 0; ii < count; ii++) {
+              arr.slice(ii, ii + sliceSize);
+            }
+            const end = hrtime.bigint();
+
+            return toMilli(Number(end - start));  // return milliseconds
+          };
+
+          const listTimeMs = runList();
+          const arrayTimeMs = runArray();
+
+          // console.log(`Array ${arrayTimeMs}ms`);
+          // console.log(`List ${listTimeMs}ms`);
+          console.log(`List is ${(listTimeMs / arrayTimeMs).toFixed(1)} times slower than Array for slice retrieval`);
+          expect(listTimeMs / arrayTimeMs).to.be.greaterThan(speedFactor);
+        });
+      });
+
+      describe('concat', () => {
+        it('is similar to array', function () {
+          this.timeout(30_000);   // event loop is blocked, so this only affects the end
+          const startSize = 200_000;
+          const appendSize = 1_000;
+          const count = 500;
+          const speedFactor = 1.5;
+
+          const runList = (): number => {
+            const list = pushList(startSize, returnCount);            // build the list quickly
+            const appendList = pushList(appendSize, returnCount);     // build the list quickly
+
+            //
+            // measure concat
+            //
+            const start = hrtime.bigint();
+            for (let ii = 0; ii < count; ii++) {
+              list.concat(appendList);
+            }
+            const end = hrtime.bigint();
+
+            return toMilli(Number(end - start));  // return milliseconds
+          };
+
+          const runArray = (): number => {
+            const arr = pushArray(startSize, returnCount);            // build the array quickly
+            const appendArr = pushArray(appendSize, returnCount);     // build the list quickly
+
+            //
+            // measure concat
+            //
+            const start = hrtime.bigint();
+            for (let ii = 0; ii < count; ii++) {
+              arr.concat(appendArr);
+            }
+            const end = hrtime.bigint();
+
+            return toMilli(Number(end - start));  // return milliseconds
+          };
+
+          const listTimeMs = runList();
+          const arrayTimeMs = runArray();
+
+          console.log(`Array ${arrayTimeMs}ms`);
+          console.log(`List ${listTimeMs}ms`);
+          console.log(`List is ${(listTimeMs / arrayTimeMs).toFixed(1)} times slower than Array for slice retrieval`);
+          // expect(listTimeMs / arrayTimeMs).to.be.greaterThan(speedFactor);
+        });
+      });
+
+      describe('push (append)', () => {
+        //
+        // Array is very fast for push, but slows down when the objects being pushed are large.
+        // This test shows that LinkedList is comparable to array in time and memory use when the elements are
+        // > 500 bytes in size and the array or list length is several hundred thousand.
+        //
+        // To run this test, you must start node with: --expose-gc
+        // If you want to test with bigger numbers, you may also need: --max-old-space-size=20000
+        //
+        // This test is disabled because it's not reliable; the garbage collector (GC), the nyc coverage logic,
+        // and IDE bring in confounding factors especially when run with previous tests.
+        //
+        // However, you can enable and play with it.
+        //
+        xit('is comparable to array for pushing large elements on long lists/arrays', function () {
+          this.timeout(80_000);   // event loop is blocked, so this only affects the end
+
+          //
+          // These values provide the comparison; your results may vary depending on your computer's
+          // capabilities.
+          //
+          const slownessFactor = 1.5;     // list will be less than this much slower than array
+          const memoryFactor = 1.3;       // list will use less than this much more memory than array
+          const sizeThreshold = 500;      // this is the size at which LinkedList becomes comparable to array
+          const startCount = 50_000;      // start with a list/array of this size
+          const measureCount = 400_000;   // and add this many more elements
+          const repeats = 10;             // repeat this many times to average results
+
+          const obj = {
+            hello: 'world',
+            mesg: 'My dog has fleas',
+            num: 424242,
+            x: 'x'.repeat(sizeThreshold)
+          };
+
+          const makeObject: makeFn<Object> = (count: number) => {
+            return {...obj, n: count};
+            // return {...obj, xs: 'x'.repeat(count % 200)};
+          };
+
+          const runList = (list: LinkedList<Object>): number => {
+            const startLen = list.length;
+            expect(startLen).to.equal(startCount);
+
+            const start = hrtime.bigint();
+            pushList(measureCount, makeObject, list);
+            const end = hrtime.bigint();
+
+            expect(list.length).to.equal(startLen + measureCount);
+
+            return toMilli(Number(end - start));  // return milliseconds
+          };
+
+          const runArray = (arr: Object[]): number => {
+            const startLen = arr.length;
+            expect(startLen).to.equal(startCount);
+
+            const start = hrtime.bigint();
+            pushArray(measureCount, makeObject, arr);
+            const end = hrtime.bigint();
+
+            expect(arr.length).to.equal(startLen + measureCount);
+
+            return toMilli(Number(end - start));  // return milliseconds
+          };
+
+          function forceGC() {
+            if (global.gc) {
+              global.gc();
+            }
           }
-        }
 
-        function testArray(): { timeMs: number, memoryMB: number, len: number } {
-          const startMemoryUsed = process.memoryUsage().heapUsed;
+          function testArray(): { timeMs: number, memoryMB: number, len: number } {
+            const startMemoryUsed = process.memoryUsage().heapUsed;
 
-          let arr = pushArray(startCount, makeObject);
-          const timeMs = runArray(arr);
-          const memoryMB = process.memoryUsage().heapUsed - startMemoryUsed;
+            let arr = pushArray(startCount, makeObject);
+            const timeMs = runArray(arr);
+            const memoryMB = process.memoryUsage().heapUsed - startMemoryUsed;
 
-          return {timeMs, memoryMB, len: arr.length};
-        }
+            return {timeMs, memoryMB, len: arr.length};
+          }
 
-        let arrayTimeMs = 0;
-        let arrayUsedMB = 0;
+          let arrayTimeMs = 0;
+          let arrayUsedMB = 0;
 
-        for (let ii = 0; ii < repeats; ii++) {
-          forceGC();
-          const {timeMs, memoryMB} = testArray();
-          arrayTimeMs += timeMs;
-          arrayUsedMB += memoryMB;
-        }
-        //
-        // compute average
-        //
-        arrayTimeMs /= repeats;
-        arrayUsedMB /= repeats;
-        console.log(`Array done ${arrayTimeMs}ms`);
-        console.log(`Array uses approximately ${Math.round(toMega(arrayUsedMB) * 100) / 100} MB`);
+          for (let ii = 0; ii < repeats; ii++) {
+            forceGC();
+            const {timeMs, memoryMB} = testArray();
+            arrayTimeMs += timeMs;
+            arrayUsedMB += memoryMB;
+          }
+          //
+          // compute average
+          //
+          arrayTimeMs /= repeats;
+          arrayUsedMB /= repeats;
+          console.log(`Array done ${arrayTimeMs}ms`);
+          console.log(`Array uses approximately ${Math.round(toMega(arrayUsedMB) * 100) / 100} MB`);
 
-        // forceGC();
-        // let freeUsed = process.memoryUsage().heapUsed - startUsed;
-        // console.log(`After freeing array: ${Math.round(toMega(freeUsed) * 100) / 100} MB`);
+          // forceGC();
+          // let freeUsed = process.memoryUsage().heapUsed - startUsed;
+          // console.log(`After freeing array: ${Math.round(toMega(freeUsed) * 100) / 100} MB`);
 
-        function testList(): { timeMs: number, memoryMB: number, len: number } {
-          const startMemoryUsed = process.memoryUsage().heapUsed;
+          function testList(): { timeMs: number, memoryMB: number, len: number } {
+            const startMemoryUsed = process.memoryUsage().heapUsed;
 
-          let list = pushList(startCount, makeObject);
-          const timeMs = runList(list);
-          const memoryMB = process.memoryUsage().heapUsed - startMemoryUsed;
+            let list = pushList(startCount, makeObject);
+            const timeMs = runList(list);
+            const memoryMB = process.memoryUsage().heapUsed - startMemoryUsed;
 
-          return {timeMs, memoryMB, len: list.length};
-        }
+            return {timeMs, memoryMB, len: list.length};
+          }
 
-        let listTimeMs = 0;
-        let listUsedMB = 0;
+          let listTimeMs = 0;
+          let listUsedMB = 0;
 
-        for (let ii = 0; ii < repeats; ii++) {
-          forceGC();
-          const {timeMs, memoryMB} = testList();
-          listTimeMs += timeMs;
-          listUsedMB += memoryMB;
-        }
-        //
-        // compute average
-        //
-        listTimeMs /= repeats;
-        listUsedMB /= repeats;
-        console.log(`List done ${listTimeMs}ms`);
-        console.log(`List uses approximately ${Math.round(toMega(listUsedMB) * 100) / 100} MB`);
+          for (let ii = 0; ii < repeats; ii++) {
+            forceGC();
+            const {timeMs, memoryMB} = testList();
+            listTimeMs += timeMs;
+            listUsedMB += memoryMB;
+          }
+          //
+          // compute average
+          //
+          listTimeMs /= repeats;
+          listUsedMB /= repeats;
+          console.log(`List done ${listTimeMs}ms`);
+          console.log(`List uses approximately ${Math.round(toMega(listUsedMB) * 100) / 100} MB`);
 
-        // forceGC();
-        // freeUsed = process.memoryUsage().heapUsed - startUsed;
-        // console.log(`After freeing list ${Math.round(toMega(freeUsed) * 100) / 100} MB`);
+          // forceGC();
+          // freeUsed = process.memoryUsage().heapUsed - startUsed;
+          // console.log(`After freeing list ${Math.round(toMega(freeUsed) * 100) / 100} MB`);
 
-        // console.log(`Array is ${(listTimeMs / arrayTimeMs).toFixed(1)} times faster than LinkedList for push`);
-        expect(listTimeMs).to.be.lessThan(arrayTimeMs * slownessFactor, 'List took longer than expected');
-        expect(listUsedMB).to.be.lessThan(arrayUsedMB * memoryFactor, 'List using more memory than expected');
+          // console.log(`Array is ${(listTimeMs / arrayTimeMs).toFixed(1)} times faster than LinkedList for push`);
+          expect(listTimeMs).to.be.lessThan(arrayTimeMs * slownessFactor, 'List took longer than expected');
+          expect(listUsedMB).to.be.lessThan(arrayUsedMB * memoryFactor, 'List using more memory than expected');
+        });
       });
     });
   });

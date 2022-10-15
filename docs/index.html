@@ -24,7 +24,34 @@ in TypeScript (which compiles to JavaScript), you can use it in code targeting b
 </a>
 <p>Arrays are a powerful and well-used data structure in both JavaScript and TypeScript.</p>
 <p>However, some operations are O(n) in Time Complexity.  These include shift and unshift.</p>
-<p>This means working with large datasets is faster with a Linked List compared to an Array.</p>
+<p>This means working with large datasets is usually faster with a Linked List compared to an Array.</p>
+
+<a href="#time-space-trade-off" id="time-space-trade-off" style="color: inherit; text-decoration: none;">
+  <h3>Time-Space trade off</h3>
+</a>
+<p>Linked lists are a classic time-space tradeoff when compare with arrays
+for some operations.</p>
+<p>Because a linked list has a &quot;pointer&quot; to the next element in the list,
+each element in the list uses slightly more memory thant the same list stored in an array.</p>
+<p>But, that extra memory provides huge speed improvement for some
+operations.</p>
+<p>Most linked list operations are similar in speed to array.</p>
+
+<a href="#operations-faster-than-array" id="operations-faster-than-array" style="color: inherit; text-decoration: none;">
+  <h4>Operations faster than array</h4>
+</a>
+<ul>
+<li>shift</li>
+<li>unshift</li>
+</ul>
+
+<a href="#operations-slower-than-array" id="operations-slower-than-array" style="color: inherit; text-decoration: none;">
+  <h4>Operations slower than array</h4>
+</a>
+<ul>
+<li>slice</li>
+<li>at</li>
+</ul>
 
 <a href="#getting-started" id="getting-started" style="color: inherit; text-decoration: none;">
   <h2>Getting started</h2>

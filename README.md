@@ -21,7 +21,28 @@ Arrays are a powerful and well-used data structure in both JavaScript and TypeSc
 
 However, some operations are O(n) in Time Complexity.  These include shift and unshift.
 
-This means working with large datasets is faster with a Linked List compared to an Array.
+This means working with large datasets is usually faster with a Linked List compared to an Array.
+
+### Time-Space trade off
+
+Linked lists are a classic time-space tradeoff when compare with arrays
+for some operations.
+
+Because a linked list has a "pointer" to the next element in the list,
+each element in the list uses slightly more memory thant the same list stored in an array.
+
+But, that extra memory provides huge speed improvement for some
+operations.
+
+Most linked list operations are similar in speed to array.
+
+#### Operations faster than array
+* shift
+* unshift
+
+#### Operations slower than array
+* slice
+* at
 
 ## Getting started
 1. Import the library.
