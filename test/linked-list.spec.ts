@@ -1263,7 +1263,7 @@ describe('linked-list', () => {
         });
       });
       describe('slice', () => {
-        it('is slower than array', function () {
+        xit('is slower than array', function () {
           this.timeout(20_000);   // event loop is blocked, so this only affects the end
           const count = 60_000;
           const speedFactor = 100;
@@ -1352,8 +1352,8 @@ describe('linked-list', () => {
           const listTimeMs = runList();
           const arrayTimeMs = runArray();
 
-          console.log(`Array ${arrayTimeMs}ms`);
-          console.log(`List ${listTimeMs}ms`);
+          // console.log(`Array ${arrayTimeMs}ms`);
+          // console.log(`List ${listTimeMs}ms`);
           console.log(`List is ${(listTimeMs / arrayTimeMs).toFixed(1)} times slower than Array for slice retrieval`);
           // expect(listTimeMs / arrayTimeMs).to.be.greaterThan(speedFactor);
         });
