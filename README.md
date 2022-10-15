@@ -29,7 +29,7 @@ Linked lists are a classic time-space tradeoff when compare with arrays
 for some operations.
 
 Because a linked list has a "pointer" to the next element in the list,
-each element in the list uses slightly more memory thant the same list stored in an array.
+each element in the list uses slightly more memory than the same list stored in an array.
 
 But, that extra memory provides huge speed improvement for some
 operations.
