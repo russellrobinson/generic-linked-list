@@ -1263,11 +1263,11 @@ describe('linked-list', () => {
         });
       });
       describe('slice', () => {
-        it('is much slower than array', function () {
+        it('is slower than array', function () {
           this.timeout(20_000);   // event loop is blocked, so this only affects the end
-          const count = 80_000;
-          const speedFactor = 150;
-          const sliceSize = 1000;
+          const count = 60_000;
+          const speedFactor = 100;
+          const sliceSize = 1_000;
 
           const runList = (): number => {
             const list = pushList(count, returnCount);     // build the list quickly
