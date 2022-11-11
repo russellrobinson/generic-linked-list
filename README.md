@@ -25,7 +25,7 @@ This means working with large datasets is usually faster with a Linked List comp
 
 ### Time-Space trade off
 
-Linked lists are a classic time-space tradeoff when compare with arrays
+Linked lists are a classic time-space tradeoff when compared with arrays
 for some operations.
 
 Because a linked list has a "pointer" to the next element in the list,
@@ -39,6 +39,8 @@ Most linked list operations are similar in speed to array.
 #### Operations faster than array
 * shift
 * unshift
+
+_These operations are 200-300 times faster than an array!_
 
 #### Operations slower than array
 * slice
@@ -95,6 +97,19 @@ Expected output:
 ```
 { name: 'John', age: 12, parent: { name: 'John', age: 42 } } { name: 'Kylie', age: 14 }
 {"name":"John","age":12,"parent":{"name":"John","age":42}},{"name":"Kylie","age":14}
+```
+
+#### Example 3 (plain JavaScript)
+```javascript
+const LinkedList = require('generic-linked-list').LinkedList;
+
+const sampleList = new LinkedList([0,1,2]);
+console.log(`Your linked list is ${[...sampleList]}`);
+```
+
+Expected output:
+```
+Your linked list is 0,1,2
 ```
 
 ## Where to next?

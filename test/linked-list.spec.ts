@@ -4,8 +4,17 @@
 
 import { expect } from 'chai';
 import { hrtime } from 'process';
-import { LinkedList } from '../src/linked-list';
+import { LinkedList } from '../src';
 import * as _ from 'lodash';
+
+function forceGC() {
+  if (global.gc) {
+    global.gc();
+  } else {
+    console.error('cannot forceGC');
+    process.exit(1);
+  }
+}
 
 describe('linked-list', () => {
 
@@ -16,7 +25,6 @@ describe('linked-list', () => {
   function toMilli(amount: number): number {
     return amount / 1_000_000;
   }
-
 
   describe('LinkedList', () => {
     type makeFn<T> = (count: number) => T;
@@ -304,6 +312,26 @@ describe('linked-list', () => {
           expect(value).to.equal(arr[index++]);
         }
         expect(index).to.equal(count);
+      });
+      it('does not leak memory', () => {
+        const count = 200_000;
+        const returnObj: makeFn<Record<string, unknown>> = (count: number) => {
+          return {
+            theCount: count,
+            asString: `${count}`,
+            hello: 'world'
+          };
+        };
+        const list = unshiftList(count, returnObj);
+        const startMemoryUsed = process.memoryUsage().heapUsed;
+
+        for (let ii = 0; ii < 50; ii++) {
+          for (const value of list) {
+            expect(value).to.exist;
+          }
+        }
+        const endMemoryUsed = process.memoryUsage().heapUsed;
+        expect(endMemoryUsed).to.be.lessThan(startMemoryUsed * 1.2);
       });
       it('instantiates with an existing list', () => {
         const count = 10_000;
@@ -1261,6 +1289,37 @@ describe('linked-list', () => {
           console.log(`Array is ${(arrayTimeMs / listTimeMs).toFixed(1)} times slower than LinkedList for shift retrieval`);
           expect(arrayTimeMs / listTimeMs).to.be.greaterThan(speedFactor);
         });
+        //
+        // requires --expose-gc on node options
+        //
+        xit('does not leak memory', () => {
+          const count = 1_000_000;
+          const returnObj: makeFn<Record<string, unknown>> = (count: number) => {
+            return {
+              theCount: count,
+              asString: `${count}`,
+              hello: 'world'
+            };
+          };
+
+          let list = unshiftList(count, returnObj);
+          const startMemoryUsed = process.memoryUsage().heapUsed;
+
+          for (let ii = 0; ii < 3; ii++) {
+            while (list.length > 0) {
+              expect(list.shift()).to.exist;
+            }
+            list = unshiftList(count, returnObj);
+          }
+          while (list.length > 0) {
+            expect(list.shift()).to.exist;
+          }
+
+          forceGC();
+
+          const endMemoryUsed = process.memoryUsage().heapUsed;
+          expect(endMemoryUsed).to.be.lessThan(startMemoryUsed * 1.1);
+        });
       });
       describe('slice', () => {
         xit('is slower than array', function () {
@@ -1315,7 +1374,7 @@ describe('linked-list', () => {
           const startSize = 200_000;
           const appendSize = 1_000;
           const count = 500;
-          const speedFactor = 1.5;
+          // const speedFactor = 1.5;
 
           const runList = (): number => {
             const list = pushList(startSize, returnCount);            // build the list quickly
@@ -1424,12 +1483,6 @@ describe('linked-list', () => {
 
             return toMilli(Number(end - start));  // return milliseconds
           };
-
-          function forceGC() {
-            if (global.gc) {
-              global.gc();
-            }
-          }
 
           function testArray(): { timeMs: number, memoryMB: number, len: number } {
             const startMemoryUsed = process.memoryUsage().heapUsed;
