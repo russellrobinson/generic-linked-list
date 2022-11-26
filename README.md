@@ -1,6 +1,7 @@
 # Single-Linked List Using Generics
 
 ## About
+
 This project implements a Single-Linked List that you can use for a linked list of any data type.
 
 The motivations for this project are:
@@ -12,14 +13,14 @@ The motivations for this project are:
 - and is well-tested;
 - and is suitable for professional Software Engineering projects.
 
-The project focuses on backend development with NodeJs in mind.  However, as it is written
+The project focuses on backend development with NodeJs in mind. However, as it is written
 in TypeScript (which compiles to JavaScript), you can use it in code targeting browsers.
 
 ## What's wrong with Arrays?
 
 Arrays are a powerful and well-used data structure in both JavaScript and TypeScript.
 
-However, some operations are O(n) in Time Complexity.  These include shift and unshift.
+However, some operations are O(n) in Time Complexity. These include shift and unshift.
 
 This means working with large datasets is usually faster with a Linked List compared to an Array.
 
@@ -37,16 +38,22 @@ operations.
 Most linked list operations are similar in speed to array.
 
 #### Operations faster than array
+
 * shift
 * unshift
 
-_These operations are 200-300 times faster than an array!_
+_These operations are many hundreds to thousands of times faster than an array!_
 
 #### Operations slower than array
+
 * slice
 * at
+* pop
+* lastIndexOf
+* fill
 
 ## Getting started
+
 1. Import the library.
 2. Create your linked list.
 3. Use it!
@@ -54,18 +61,21 @@ _These operations are 200-300 times faster than an array!_
 ### Add to your project
 
 With `yarn`:
+
 ```shell
 yarn add generic-linked-list --save
 ```
 
 With `npm`:
+
 ```shell
 npm --save-prod i generic-linked-list
 ```
 
-### TypeScript examples 
+### TypeScript examples
 
 #### Example 1
+
 ```typescript
 import { LinkedList } from 'generic-linked-list';
 
@@ -73,20 +83,23 @@ const numList = new LinkedList([1, 2, 3]);
 console.log(...numList);
 console.log(numList.toString());
 ```
+
 Expected output:
+
 ```
 1 2 3
 1,2,3
 ```
 
 #### Example 2
+
 ```typescript
 import { LinkedList } from 'generic-linked-list';
 
 type Person = { name: string, age: number; parent?: Person };
 const peopleList = new LinkedList<Person>();
 peopleList.push(
-  {name: 'John', age: 12, parent: {name :'John', age: 42}},
+  {name: 'John', age: 12, parent: {name: 'John', age: 42}},
   {name: 'Kylie', age: 14}
 );
 console.log(...peopleList);
@@ -94,20 +107,23 @@ console.log(peopleList.toString());
 ```
 
 Expected output:
+
 ```
 { name: 'John', age: 12, parent: { name: 'John', age: 42 } } { name: 'Kylie', age: 14 }
 {"name":"John","age":12,"parent":{"name":"John","age":42}},{"name":"Kylie","age":14}
 ```
 
 #### Example 3 (plain JavaScript)
+
 ```javascript
 const LinkedList = require('generic-linked-list').LinkedList;
 
-const sampleList = new LinkedList([0,1,2]);
+const sampleList = new LinkedList([0, 1, 2]);
 console.log(`Your linked list is ${[...sampleList]}`);
 ```
 
 Expected output:
+
 ```
 Your linked list is 0,1,2
 ```
@@ -117,24 +133,74 @@ Your linked list is 0,1,2
 The documentation is generated using [TypeDoc](https://www.npmjs.com/package/typedoc) using
 comments in the source code.
 
-The project's GitHub page contains the documentation and is [the best place to start](https://russellrobinson.github.io/generic-linked-list/classes/linked_list.LinkedList.html).
+The project's GitHub page contains the documentation and
+is [the best place to start](https://russellrobinson.github.io/generic-linked-list/classes/linked_list.LinkedList.html).
 
 ## Example code
+
 To access example code that actually runs:
 
 - download the package;
 - look in the `src/examples` folder.
 
+## Version 2 Compatiblility
+Version 2 aims to be even closer to a drop-in replacement for Array.
+
+Version 2 implements additional constructor options to make LinkedList more similar to Array construction.
+It also clarifies the semantics of the `from` method.
+
+In particular, the constructor now implements both a length and an item list constructor.
+
+### Version 2 Constructor
+This means that the following code in Version 1:
+
+```typescript
+const list = new LinkedList<number>([1, 2]);
+```
+must be changed to:
+```typescript
+const list = new LinkedList<number>(...[1, 2]);
+```
+or
+```typescript
+const list = new LinkedList<number>(1, 2);
+```
+
+If you want to build a LinkedList from an array with the spread operator, use the `from` method:
+```typescript
+const list = LinkedList.from([1, 2]);
+```
+
+### Version 2 `from` method
+`LinkedList.from` behaves differently to Array when called with non-array constructors.  See the
+[documentation for Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from#calling_from_on_non-array_constructors) about this.
+
+## Version History
+
+| Version | Date        | Description                                                                                                                                                                                                                                                                                                                |
+|--------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 2.0.0  | 21-Nov-2022 | Version 1 is mostly compatible with version 2, except for the following enhancements:<br/>*  Added support for negative indexes in these methods: `at`, `indexOf`, `includes`, `slice`.<br/>* Added the following methods: `entries`, `from`, `grow`, `join`, `keys`, `keysAsList`, `lastIndexOf`, `of`, `pop`, `truncate` |
+| 1.1.3  | 11-Nov-2022 | Documentation and test improvements.                                                                                                                                                                                                                                                                                       |
+| 1.1.2  | 15-Oct-2022 | Added missing `index.ts` file.                                                                                                                                                                                                                                                                                             |
+| 1.1.1  | 15-Oct-2022 | Test improvements.                                                                                                                                                                                                                                                                                                         |
+| 1.1.0  | 15-Oct-2022 | Added `slice` and `end` methods.                                                                                                                                                                                                                                                                                           |
+| 1.0.3  | 22-Sep-2022 | Documentation and test improvements.                                                                                                                                                                                                                                                                                       |
+| 1.0.1  | 17-Sep-2022 | Documentation improvements.                                                                                                                                                                                                                                                                                                |
+| 1.0.0  | 17-Sep-2022 | First "official" release.                                                                                                                                                                                                                                                                                                  |
+
 ## Node.js version
+
 The project was developed in NodeJs version 14.15.4 and should run seamlessly in any later
 version of Node.js.
 
 ## TypeScript version
+
 The project was developed with TypeScript 4.5.5 and should compile seamlessly in any later
 version of TypeScript.
 
 ## About the author
+
 Russell Robinson is a Software Engineer with decades of experience across a range of industries.
 
-He lives in Melbourne, Australia, and can be contacted by email.
+He lives in Melbourne, Australia.
 
