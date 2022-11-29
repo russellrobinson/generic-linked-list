@@ -1,5 +1,6 @@
 # Changelog
 
+For later versions, see "Version History" in README.
 
 ## [1.0.0] - 2022-02-11
 

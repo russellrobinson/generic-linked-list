@@ -4,7 +4,7 @@
 
 import { expect } from 'chai';
 import { hrtime } from 'process';
-import { LinkedList } from '../src';
+import { LinkedList, RecursiveLinkedList } from '../src';
 import * as _ from 'lodash';
 
 function forceGC() {
@@ -139,18 +139,21 @@ describe('linked-list', () => {
         expect(list.shift()).to.equal(2);
         expect(list.shift()).to.equal(3);
       });
-      it('instantiates arrays as-is', () => {
-        const list = new LinkedList<number[]>([1, 2, 3]);
+      describe('instantiates arrays as-is', () => {
+        it('works with a single value', () => {
+          const list = new LinkedList<number[]>([1, 2, 3]);
 
-        expect(list.length).to.equal(1);
-        expect(list.shift()).to.deep.equal([1, 2, 3]);
-      });
-      it('instantiates arrays as-is', () => {
-        const list = new LinkedList<number[]>([1, 2, 3], [4, 5, 6]);
+          expect(list.length).to.equal(1);
+          expect(list.shift()).to.deep.equal([1, 2, 3]);
+        });
+        it('works with multiple values', () => {
+          const list = new LinkedList<number[]>([1, 2, 3], [4, 5, 6], [0, 1]);
 
-        expect(list.length).to.equal(2);
-        expect(list.shift()).to.deep.equal([1, 2, 3]);
-        expect(list.shift()).to.deep.equal([4, 5, 6]);
+          expect(list.length).to.equal(3);
+          expect(list.shift()).to.deep.equal([1, 2, 3]);
+          expect(list.shift()).to.deep.equal([4, 5, 6]);
+          expect(list.shift()).to.deep.equal([0, 1]);
+        });
       });
       it('instantiates with length', () => {
         const list = new LinkedList<number | undefined>(3);
@@ -181,21 +184,13 @@ describe('linked-list', () => {
         expect(list2.shift()).to.equal(3);
       });
       describe('unusual lengths', () => {
-        const MAX_LENGTH = (2 ^ 32) - 1;
+        const MAX_LENGTH = (2 ** 32) - 1;
 
         it('-ve is not a length', () => {
           const list = new LinkedList<number>(-1);
 
           expect(list.length).to.equal(1);
           expect(list.shift()).to.equal(-1);
-        });
-        it('maximum is 2^32-1', () => {
-          const list = new LinkedList<number>(MAX_LENGTH);
-
-          expect(list.length).to.equal(MAX_LENGTH);
-          for (const value of list) {
-            expect(value).to.equal(undefined);
-          }
         });
         it('greater than max is a single element', () => {
           const list = new LinkedList<number>(MAX_LENGTH + 1);
@@ -366,7 +361,7 @@ describe('linked-list', () => {
       });
       describe('calling from() on non-array constructors', () => {
         it('shows how Array.from behaves', () => {
-          function NotArray(len) {
+          function NotArray(/*len*/) {
             //console.log("NotArray called with length", len);
           }
 
@@ -388,7 +383,7 @@ describe('linked-list', () => {
         // an iterable or array-like has been passed in so we use it.
         //
         it('does not behave like Array with random functions', () => {
-          function NotList(len) {
+          function NotList(/*len*/) {
             //console.log("NotList called with length", len);
           }
 
@@ -409,16 +404,7 @@ describe('linked-list', () => {
           expect(list3.at(0)).to.equal('foo');
         });
         it('does behave like Array with an object', () => {
-          function NotArray(len) {
-            //console.log("NotArray called with length", len);
-          }
-
           expect(Array.from.call({}, {length: 1, 0: "foo"})).to.deep.equal(['foo']);
-
-          function NotList(len) {
-            //console.log("NotList called with length", len);
-          }
-
           const list = LinkedList.from.call({}, {length: 1, 0: "foo"});
           expect(list.length).to.equal(1);
           expect(list.at(0)).to.equal('foo');
@@ -451,6 +437,19 @@ describe('linked-list', () => {
         const list = LinkedList.of<string | number>(1, 2, 3, -42, 'hello');
 
         expect(list.join('')).to.equal('123-42hello');
+      });
+      it('undefined values produce empty string', () => {
+        const list = LinkedList.of<number | string | undefined>(1, undefined, 2, 3, -42, 'hello');
+
+        expect(list.join('')).to.equal('123-42hello');
+      });
+    });
+
+    describe('toString', () => {
+      it('it works with LinkedList', () => {
+        const list = LinkedList.of<string | number>(1, 2, 3, -42, 'hello');
+
+        expect(list.toString()).to.equal('1,2,3,-42,"hello"');
       });
     });
 
@@ -836,6 +835,22 @@ describe('linked-list', () => {
         const list = new LinkedList<number>(...fixture);
         compare(list.values());
       });
+      it('creates a readonly iterator', () => {
+        function isWritable<T extends Object>(obj: T, key: keyof T) {
+          const desc = Object.getOwnPropertyDescriptor(obj, key) || {};
+          return Boolean(desc.writable);
+        }
+
+        const fixture: number[] = [1, 2, 3, 4];
+        const list = new LinkedList<number>(...fixture);
+        const it = list.values();
+        let next = it.next();
+
+        while (!next.done) {
+          expect(!isWritable(next, 'value'));
+          next = it.next();
+        }
+      });
     });
 
     describe('entries', () => {
@@ -936,6 +951,13 @@ describe('linked-list', () => {
           expect(list.indexOf(2, -2)).to.equal(4);
           expect(list.indexOf(2, -1)).to.equal(5);
           expect(list.indexOf(2, -(list.length - 1))).to.equal(1);
+        });
+        it('large -ve fromIndex', () => {
+          const fixture = [1, 2, 3, 4, 2, 2];
+          expect(fixture.indexOf(2, -fixture.length - 1)).to.equal(1);
+
+          const list = new LinkedList<number>(...fixture);
+          expect(list.indexOf(2, -list.length - 1)).to.equal(1);
         });
       });
       it('returns -1 with no matching element just like Array', () => {
@@ -1050,6 +1072,75 @@ describe('linked-list', () => {
 
         const list = new LinkedList<number>(...fixture);
         expect(list.lastIndexOf(2)).to.equal(4);
+      });
+    });
+    describe('map', () => {
+      it('maps lists just like Array', () => {
+        const fixture = [1, 2, 3, 1];
+        const callback = value => value * 2;
+
+        expect(fixture.map(callback)).to.deep.equal([2, 4, 6, 2]);
+
+        const list = new LinkedList<number>(...fixture);
+        const result = list.map(callback);
+
+        expect(result.length).to.equal(4);
+        expect(result).to.not.equal(list);
+        expect(result.at(0)).to.equal(2);
+        expect(result.at(1)).to.equal(4);
+        expect(result.at(2)).to.equal(6);
+        expect(result.at(3)).to.equal(2);
+      });
+      it('provides an index parameter', () => {
+        const fixture = ['a', 'b', 'c', 'd'];
+        const callback = (value, index) => index;
+
+        expect(fixture.map(callback)).to.deep.equal([0, 1, 2, 3]);
+
+        const list = new LinkedList<string>(...fixture);
+        const result = list.map(callback);
+
+        expect(result.length).to.equal(4);
+        expect(result).to.not.equal(list);
+        expect(result.at(0)).to.equal(0);
+        expect(result.at(1)).to.equal(1);
+        expect(result.at(2)).to.equal(2);
+        expect(result.at(3)).to.equal(3);
+      });
+      it('provides the list parameter', () => {
+        const fixture = ['a', 'b', 'c', 'd'];
+        const callback = (value, index, theList) => theList.at(index);
+        const list = new LinkedList<string>(...fixture);
+        const result = list.map(callback);
+
+        expect(result.length).to.equal(4);
+        expect(result).to.not.equal(list);
+        expect(result.at(0)).to.equal(fixture[0]);
+        expect(result.at(1)).to.equal(fixture[1]);
+        expect(result.at(2)).to.equal(fixture[2]);
+        expect(result.at(3)).to.equal(fixture[3]);
+      });
+      it('binds the thisArg', () => {
+        class Mapper {
+          doMap(index: number): number {
+            return index * 2;
+          }
+        }
+
+        const mapper = new Mapper();
+
+        const fixture = ['a', 'b', 'c', 'd'];
+        const list = new LinkedList<string>(...fixture);
+        const result = list.map(function (this: Mapper, value, index) {
+          return this.doMap(index);
+        }, mapper);
+
+        expect(result.length).to.equal(4);
+        expect(result).to.not.equal(list);
+        expect(result.at(0)).to.equal(0);
+        expect(result.at(1)).to.equal(2);
+        expect(result.at(2)).to.equal(4);
+        expect(result.at(3)).to.equal(6);
       });
     });
     describe('concat', () => {
@@ -1385,6 +1476,236 @@ describe('linked-list', () => {
         expect(list.length).to.equal(1);
         expect(list.at(0)).to.equal(42);
       });
+      it('fills a list just like Array', () => {
+        const SIZE = 1000;
+        const FIXTURE = 42;
+        const arr = Array(SIZE);
+
+        arr.fill(FIXTURE);
+        expect(arr.length).to.equal(SIZE);
+        for (const value of arr) {
+          expect(value).to.equal(FIXTURE);
+        }
+
+        const list = new LinkedList<number>(SIZE);
+        list.fill(FIXTURE);
+        expect(list.length).to.equal(SIZE);
+        for (const value of list) {
+          expect(value).to.equal(FIXTURE);
+        }
+      });
+      describe('start index', () => {
+        it('sets the starting point', () => {
+          const SIZE = 100;
+          const FIXTURE = 42;
+          const arr = Array(SIZE);
+
+          expect(arr.length).to.equal(SIZE);
+          arr.fill(FIXTURE, SIZE / 2);
+          let index = 0;
+          for (const value of arr) {
+            if (index < SIZE / 2) {
+              expect(value).to.equal(undefined);
+            } else {
+              expect(value).to.equal(FIXTURE);
+            }
+            index++;
+          }
+
+          const list = new LinkedList<number>(SIZE);
+          expect(list.length).to.equal(SIZE);
+          list.fill(FIXTURE, SIZE / 2);
+          index = 0;
+          for (const value of list) {
+            if (index < SIZE / 2) {
+              expect(value).to.equal(undefined);
+            } else {
+              expect(value).to.equal(FIXTURE);
+            }
+            index++;
+          }
+        });
+        it('works with -ve', () => {
+          const SIZE = 100;
+          const FIXTURE = 42;
+          const arr = Array(SIZE);
+
+          expect(arr.length).to.equal(SIZE);
+          arr.fill(FIXTURE, -SIZE / 2);
+          let index = 0;
+          for (const value of arr) {
+            if (index < SIZE / 2) {
+              expect(value).to.equal(undefined);
+            } else {
+              expect(value).to.equal(FIXTURE);
+            }
+            index++;
+          }
+
+          const list = new LinkedList<number>(SIZE);
+          expect(list.length).to.equal(SIZE);
+          list.fill(FIXTURE, -SIZE / 2);
+          index = 0;
+          for (const value of list) {
+            if (index < SIZE / 2) {
+              expect(value).to.equal(undefined);
+            } else {
+              expect(value).to.equal(FIXTURE);
+            }
+            index++;
+          }
+        });
+        it('resets to 0 if too small', () => {
+          const SIZE = 100;
+          const FIXTURE = 42;
+          const arr = Array(SIZE);
+
+          expect(arr.length).to.equal(SIZE);
+          arr.fill(FIXTURE, -SIZE - 1);
+          let index = 0;
+          for (const value of arr) {
+            expect(value).to.equal(FIXTURE);
+            index++;
+          }
+
+          const list = new LinkedList<number>(SIZE);
+          expect(list.length).to.equal(SIZE);
+          list.fill(FIXTURE, -SIZE - 1);
+          index = 0;
+          for (const value of list) {
+            expect(value).to.equal(FIXTURE);
+            index++;
+          }
+        });
+        it('extends to the end if too large', () => {
+          const SIZE = 100;
+          const FIXTURE = 42;
+          const arr = Array(SIZE);
+
+          expect(arr.length).to.equal(SIZE);
+          arr.fill(FIXTURE, SIZE + 1);
+          let index = 0;
+          for (const value of arr) {
+            expect(value).to.equal(undefined);
+            index++;
+          }
+
+          const list = new LinkedList<number>(SIZE);
+          expect(list.length).to.equal(SIZE);
+          list.fill(FIXTURE, SIZE + 1);
+          index = 0;
+          for (const value of list) {
+            expect(value).to.equal(undefined);
+            index++;
+          }
+        });
+        it('does nothing if too small', () => {
+          const SIZE = 100;
+          const FIXTURE = 42;
+          const arr = Array(SIZE);
+
+          expect(arr.length).to.equal(SIZE);
+          arr.fill(FIXTURE, 0, -SIZE - 1);
+          let index = 0;
+          for (const value of arr) {
+            expect(value).to.equal(undefined);
+            index++;
+          }
+
+          const list = new LinkedList<number>(SIZE);
+          expect(list.length).to.equal(SIZE);
+          list.fill(FIXTURE, 0, -SIZE - 1);
+          index = 0;
+          for (const value of list) {
+            expect(value).to.equal(undefined);
+            index++;
+          }
+        });
+      });
+      describe('end index', () => {
+        it('sets the end point', () => {
+          const SIZE = 100;
+          const FIXTURE = 42;
+          const arr = Array(SIZE);
+
+          expect(arr.length).to.equal(SIZE);
+          arr.fill(FIXTURE, 0, SIZE / 2);
+          let index = 0;
+          for (const value of arr) {
+            if (index < SIZE / 2) {
+              expect(value).to.equal(FIXTURE);
+            } else {
+              expect(value).to.equal(undefined);
+            }
+            index++;
+          }
+
+          const list = new LinkedList<number>(SIZE);
+          expect(list.length).to.equal(SIZE);
+          list.fill(FIXTURE, 0, SIZE / 2);
+          index = 0;
+          for (const value of list) {
+            if (index < SIZE / 2) {
+              expect(value).to.equal(FIXTURE);
+            } else {
+              expect(value).to.equal(undefined);
+            }
+            index++;
+          }
+        });
+        it('works with -ve', () => {
+          const SIZE = 100;
+          const FIXTURE = 42;
+          const arr = Array(SIZE);
+
+          expect(arr.length).to.equal(SIZE);
+          arr.fill(FIXTURE, 0, -SIZE / 2);
+          let index = 0;
+          for (const value of arr) {
+            if (index < SIZE / 2) {
+              expect(value).to.equal(FIXTURE);
+            } else {
+              expect(value).to.equal(undefined);
+            }
+            index++;
+          }
+
+          const list = new LinkedList<number>(SIZE);
+          expect(list.length).to.equal(SIZE);
+          list.fill(FIXTURE, 0, -SIZE / 2);
+          index = 0;
+          for (const value of list) {
+            if (index < SIZE / 2) {
+              expect(value).to.equal(FIXTURE);
+            } else {
+              expect(value).to.equal(undefined);
+            }
+            index++;
+          }
+        });
+        it('resets to 0 if too small', () => {
+          const SIZE = 100;
+          const FIXTURE = 42;
+          const arr = Array(SIZE);
+
+          expect(arr.length).to.equal(SIZE);
+          arr.fill(FIXTURE, 0, -SIZE - 1);
+          let index = 0;
+          for (const value of arr) {
+            expect(value).to.equal(undefined);
+            index++;
+          }
+
+          const list = new LinkedList<number>(SIZE);
+          expect(list.length).to.equal(SIZE);
+          list.fill(FIXTURE, 0, -SIZE - 1);
+          index = 0;
+          for (const value of list) {
+            expect(value).to.equal(undefined);
+            index++;
+          }
+        });
+      });
     });
 
     describe('filter', () => {
@@ -1466,6 +1787,173 @@ describe('linked-list', () => {
         //
         expect(() => myObj.arr.find(pred)).to.throw();
         expect(() => myObj.list.find(pred)).to.throw();
+      });
+    });
+
+    describe('flat', () => {
+      it('leaves a simple list unchanged', () => {
+        const fixture = [1, 2, 3, 4, 2, 5, 2, 6, 2, 7];
+
+        const arrResult = fixture.flat();
+        expect(arrResult).to.not.equal(fixture);
+        expect(arrResult).to.deep.equal(fixture);
+
+        const list: RecursiveLinkedList<number> = new LinkedList(...fixture);
+        const listResult = list.flat();
+
+        expect(listResult.length).to.equal(fixture.length);
+        let index = 0;
+        for (const value of listResult) {
+          expect(value).to.equal(fixture[index]);
+          index++;
+        }
+      });
+      it('flattens single recursion to default depth of 1', () => {
+        const fixture1 = [1, 2];
+        const subFixture = [3, 4];
+        const fixture2 = [5, 6];
+        const arrFixture = [...fixture1, subFixture, ...fixture2];
+        const expectedResult = [1, 2, 3, 4, 5, 6];
+
+        const arrResult = arrFixture.flat();
+        expect(arrResult).to.not.equal(arrFixture);
+        expect(arrResult).to.deep.equal(expectedResult);
+
+        //
+        // The input list looks like this:
+        //      1 -> 2 -> L -> 5 -> 6
+        //                |
+        //                3 -> 4
+        //
+        const subListFixture = new LinkedList<number>(...subFixture);
+        const list = new LinkedList<number | LinkedList<number>>(...fixture1, subListFixture, ...fixture2);
+        const listResult = list.flat();
+
+        expect(listResult.length).to.equal(expectedResult.length);
+        let index = 0;
+        for (const value of listResult) {
+          expect(value).to.equal(expectedResult[index]);
+          index++;
+        }
+      });
+      it('flattens double recursion to default depth of 1', () => {
+        const fixture1 = [1, 2];
+        const subFixture2 = [98, 99];
+        const subFixture1 = [3, subFixture2, 4];
+        const fixture3 = [5, 6];
+        const arrFixture = [...fixture1, subFixture1, ...fixture3];
+        const expectedResult = [1, 2, 3, [98, 99], 4, 5, 6];
+
+        const arrResult = arrFixture.flat();
+        expect(arrResult).to.not.equal(arrFixture);
+        expect(arrResult).to.deep.equal(expectedResult);
+
+        //
+        // The input list looks like this:
+        //      1 -> 2 -> L -> 5 -> 6
+        //                |
+        //                3 -> L -> 4
+        //                     |
+        //                     98 -> 99
+        //
+        const subListFixture2 = new LinkedList<number>(...subFixture2);
+        const subListFixture1 = new LinkedList<number | LinkedList<number>>(3, subListFixture2, 4);
+        const list = new LinkedList<number | RecursiveLinkedList<number>>(...fixture1, subListFixture1, ...fixture3);
+        const listResult = list.flat();
+
+        expect(listResult.length).to.equal(expectedResult.length);
+        expect(listResult.at(0)).to.equal(1);
+        expect(listResult.at(1)).to.equal(2);
+        expect(listResult.at(2)).to.equal(3);
+
+        expect(LinkedList.isLinkedList(listResult.at(3))).to.be.true;
+        const subList = listResult.at(3) as LinkedList<number>;
+        expect(subList.at(0)).to.equal(98);
+        expect(subList.at(1)).to.equal(99);
+
+        expect(listResult.at(4)).to.equal(4);
+        expect(listResult.at(5)).to.equal(5);
+        expect(listResult.at(6)).to.equal(6);
+      });
+      it('does nothing with a depth of zero', () => {
+        const ZERO = 0;
+        const fixture1 = [1, 2];
+        const subFixture2 = [98, 99];
+        const subFixture1 = [3, subFixture2, 4];
+        const fixture3 = [5, 6];
+        const arrFixture = [...fixture1, subFixture1, ...fixture3];
+        const expectedResult = arrFixture;
+
+        const arrResult = arrFixture.flat(ZERO);
+        expect(arrResult).to.not.equal(arrFixture);
+        expect(arrResult).to.deep.equal(expectedResult);
+
+        //
+        // The input list looks like this:
+        //      1 -> 2 -> L -> 5 -> 6
+        //                |
+        //                3 -> L -> 4
+        //                     |
+        //                     98 -> 99
+        //
+        const subListFixture2 = new LinkedList<number>(...subFixture2);
+        const subListFixture1 = new LinkedList<number | LinkedList<number>>(3, subListFixture2, 4);
+        const list = new LinkedList<number | RecursiveLinkedList<number>>(...fixture1, subListFixture1, ...fixture3);
+        const listResult = list.flat(ZERO);
+
+        expect(listResult.length).to.equal(expectedResult.length);
+        expect(listResult.at(0)).to.equal(1);
+        expect(listResult.at(1)).to.equal(2);
+
+        expect(LinkedList.isLinkedList(listResult.at(2))).to.be.true;
+        const subList1 = listResult.at(2) as LinkedList<number | RecursiveLinkedList<number>>;
+        expect(subList1.at(0)).to.equal(3);
+        expect(subList1.at(2)).to.equal(4);
+
+        expect(LinkedList.isLinkedList(subList1.at(1))).to.be.true;
+        const subList2 = subList1.at(1) as LinkedList<number>;
+        expect(subList2.at(0)).to.equal(98);
+        expect(subList2.at(1)).to.equal(99);
+
+        expect(listResult.at(3)).to.equal(5);
+        expect(listResult.at(4)).to.equal(6);
+      });
+      it('flattens recursively to specified depth', () => {
+        const DEPTH = 3;
+        const fixture1 = [1, 2];
+        const subFixture3 = [998, 999];
+        const subFixture2 = [98, 99];
+        const subFixture1 = [3, ...[subFixture2, subFixture3], 4];
+        const fixture3 = [5, 6];
+        const arrFixture = [...fixture1, subFixture1, ...fixture3];
+        const expectedResult = [1, 2, 3, 98, 99, 998, 999, 4, 5, 6];
+
+        const arrResult = arrFixture.flat(DEPTH);
+        expect(arrResult).to.not.equal(arrFixture);
+        expect(arrResult).to.deep.equal(expectedResult);
+
+        //
+        // The input list looks like this:
+        //      1 -> 2 -> L -> 5 -> 6
+        //                |
+        //                3 -> L -> 4
+        //                     |
+        //                     98 -> 99 -> L
+        //                                 |
+        //                                 998 -> 999
+        //
+        const subListFixture3 = new LinkedList<number>(...subFixture3);
+        const subListFixture2 = new LinkedList<number | LinkedList<number>>(...subFixture2, subListFixture3);
+        const subListFixture1 = new LinkedList<number | RecursiveLinkedList<number>>(3, subListFixture2, 4);
+        const list = new LinkedList<number | RecursiveLinkedList<number>>(...fixture1, subListFixture1, ...fixture3);
+        const listResult = list.flat(DEPTH);
+
+        expect(listResult.length).to.equal(expectedResult.length);
+        let index = 0;
+        for (const value of listResult) {
+          expect(value).to.equal(expectedResult[index]);
+          index++;
+        }
       });
     });
 
@@ -1958,13 +2446,428 @@ describe('linked-list', () => {
         });
       });
     });
+    describe('splice', () => {
+      const fixture: number[] = [1, 2, 3, 4];
 
+      describe('delete', () => {
+        it('works with an empty list', () => {
+          const arr = [];
+          expect(arr.length).to.equal(0);
+          const arrResult = arr.splice(0);
+          expect(arr.length).to.equal(0);
+          expect(arrResult.length).to.equal(0);
+
+          const list = new LinkedList<string>();
+          expect(list.length).to.equal(0);
+          const listResult = list.splice(0);
+          expect(list.length).to.equal(0);
+          expect(listResult.length).to.equal(0);
+        });
+        it('works with a big list', () => {
+          const SIZE = 1000;
+          const FROM = 2;
+          const arr = Array(SIZE);
+          expect(arr.length).to.equal(SIZE);
+          const arrResult = arr.splice(FROM, SIZE + 1);
+          expect(arr.length).to.equal(FROM);
+          expect(arrResult.length).to.equal(SIZE - FROM);
+
+          const list = new LinkedList<string | undefined>(SIZE);
+          expect(list.length).to.equal(SIZE);
+          const listResult = list.splice(FROM, SIZE + 1);
+          expect(list.length).to.equal(FROM);
+          expect(listResult.length).to.equal(SIZE - FROM);
+        });
+
+        it('deletes write to the end', () => {
+          const arr = new Array(...fixture);
+          expect(arr.length).to.equal(4);
+          const arrResult = arr.splice(0, 1000);
+          expect(arr.length).to.equal(0);
+          expect(arrResult.length).to.equal(4);
+          expect(arrResult[0]).to.equal(1);
+          expect(arrResult[1]).to.equal(2);
+          expect(arrResult[2]).to.equal(3);
+          expect(arrResult[3]).to.equal(4);
+
+          const list = new LinkedList<number>(...fixture);
+          expect(list.length).to.equal(4);
+          const listResult = list.splice(0, 1000);
+          expect(list.length).to.equal(0);
+          expect(listResult.length).to.equal(4);
+          expect(listResult.at(0)).to.equal(1);
+          expect(listResult.at(1)).to.equal(2);
+          expect(listResult.at(2)).to.equal(3);
+          expect(listResult.at(3)).to.equal(4);
+        });
+
+        it('deletes everything with missing deleteCount', () => {
+          const arr = new Array(...fixture);
+          expect(arr.length).to.equal(4);
+          const arrResult = arr.splice(0);
+          expect(arr.length).to.equal(0);
+          expect(arrResult.length).to.equal(4);
+          expect(arrResult[0]).to.equal(1);
+          expect(arrResult[1]).to.equal(2);
+          expect(arrResult[2]).to.equal(3);
+          expect(arrResult[3]).to.equal(4);
+
+          const list = new LinkedList<number>(...fixture);
+          expect(list.length).to.equal(4);
+          const listResult = list.splice(0);
+          expect(list.length).to.equal(0);
+          expect(listResult.length).to.equal(4);
+          expect(listResult.at(0)).to.equal(1);
+          expect(listResult.at(1)).to.equal(2);
+          expect(listResult.at(2)).to.equal(3);
+          expect(listResult.at(3)).to.equal(4);
+        });
+        it('does nothing if deleteCount === 0', () => {
+          const arr = new Array(...fixture);
+          expect(arr.length).to.equal(4);
+          const arrResult = arr.splice(0, 0);
+          expect(arrResult.length).to.equal(0);
+          expect(arr[0]).to.equal(1);
+          expect(arr[1]).to.equal(2);
+          expect(arr[2]).to.equal(3);
+          expect(arr[3]).to.equal(4);
+
+          const list = new LinkedList<number>(...fixture);
+          expect(list.length).to.equal(4);
+          const listResult = list.splice(0, 0);
+          expect(listResult.length).to.equal(0);
+          expect(list.at(0)).to.equal(1);
+          expect(list.at(1)).to.equal(2);
+          expect(list.at(2)).to.equal(3);
+          expect(list.at(3)).to.equal(4);
+        });
+        it('does nothing if deleteCount < 0', () => {
+          const arr = new Array(...fixture);
+          expect(arr.length).to.equal(4);
+          const arrResult = arr.splice(0, -1);
+          expect(arrResult.length).to.equal(0);
+          expect(arr[0]).to.equal(1);
+          expect(arr[1]).to.equal(2);
+          expect(arr[2]).to.equal(3);
+          expect(arr[3]).to.equal(4);
+
+          const list = new LinkedList<number>(...fixture);
+          expect(list.length).to.equal(4);
+          const listResult = list.splice(0, -1);
+          expect(listResult.length).to.equal(0);
+          expect(list.at(0)).to.equal(1);
+          expect(list.at(1)).to.equal(2);
+          expect(list.at(2)).to.equal(3);
+          expect(list.at(3)).to.equal(4);
+        });
+        it('deletes everything after start with default deleteCount', () => {
+          const arr = new Array(...fixture);
+          expect(arr.length).to.equal(4);
+          const arrResult = arr.splice(2);
+          expect(arr.length).to.equal(2);
+          expect(arrResult.length).to.equal(2);
+          expect(arr[0]).to.equal(1);
+          expect(arr[1]).to.equal(2);
+          expect(arrResult[0]).to.equal(3);
+          expect(arrResult[1]).to.equal(4);
+
+          const list = new LinkedList<number>(...fixture);
+          expect(list.length).to.equal(4);
+          const listResult = list.splice(2);
+          expect(list.length).to.equal(2);
+          expect(listResult.length).to.equal(2);
+          expect(list.at(0)).to.equal(1);
+          expect(list.at(1)).to.equal(2);
+          expect(listResult.at(0)).to.equal(3);
+          expect(listResult.at(1)).to.equal(4);
+        });
+        describe('start index', () => {
+          //
+          // note, despite the documentation for Array, start index is mandatory (probably an ECMA level)
+          //
+          it('accepts -ve start index', () => {
+            const arr = new Array(...fixture);
+            expect(arr.length).to.equal(4);
+            const arrResult = arr.splice(-2);
+            expect(arr.length).to.equal(2);
+            expect(arrResult.length).to.equal(2);
+            expect(arr[0]).to.equal(1);
+            expect(arr[1]).to.equal(2);
+            expect(arrResult[0]).to.equal(3);
+            expect(arrResult[1]).to.equal(4);
+
+            const list = new LinkedList<number>(...fixture);
+            expect(list.length).to.equal(4);
+            const listResult = list.splice(-2);
+            expect(list.length).to.equal(2);
+            expect(listResult.length).to.equal(2);
+            expect(list.at(0)).to.equal(1);
+            expect(list.at(1)).to.equal(2);
+            expect(listResult.at(0)).to.equal(3);
+            expect(listResult.at(1)).to.equal(4);
+          });
+          it('accepts large -ve start index as 0', () => {
+            const arr = new Array(...fixture);
+            expect(arr.length).to.equal(4);
+            const arrResult = arr.splice(-fixture.length - 1);
+            expect(arr.length).to.equal(0);
+            expect(arrResult.length).to.equal(4);
+            expect(arrResult[0]).to.equal(1);
+            expect(arrResult[1]).to.equal(2);
+            expect(arrResult[2]).to.equal(3);
+            expect(arrResult[3]).to.equal(4);
+
+            const list = new LinkedList<number>(...fixture);
+            expect(list.length).to.equal(4);
+            const listResult = list.splice(-fixture.length - 1);
+            expect(list.length).to.equal(0);
+            expect(listResult.length).to.equal(4);
+            expect(listResult.at(0)).to.equal(1);
+            expect(listResult.at(1)).to.equal(2);
+            expect(listResult.at(2)).to.equal(3);
+            expect(listResult.at(3)).to.equal(4);
+          });
+          it('does nothing if start >= end of list', () => {
+            const arr = new Array(...fixture);
+            expect(arr.length).to.equal(4);
+            const arrResult = arr.splice(fixture.length + 1);
+            expect(arr.length).to.equal(4);
+            expect(arrResult.length).to.equal(0);
+            expect(arr[0]).to.equal(1);
+            expect(arr[1]).to.equal(2);
+            expect(arr[2]).to.equal(3);
+            expect(arr[3]).to.equal(4);
+
+            const list = new LinkedList<number>(...fixture);
+            expect(list.length).to.equal(4);
+            const listResult = list.splice(fixture.length + 1);
+            expect(list.length).to.equal(4);
+            expect(listResult.length).to.equal(0);
+            expect(list.at(0)).to.equal(1);
+            expect(list.at(1)).to.equal(2);
+            expect(list.at(2)).to.equal(3);
+            expect(list.at(3)).to.equal(4);
+          });
+        });
+      });
+      describe('insert', () => {
+        it('works with an empty list', () => {
+          const arr = Array<string>();
+          expect(arr.length).to.equal(0);
+          const arrResult = arr.splice(0, 0, 'a', 'b');
+          expect(arr.length).to.equal(2);
+          expect(arrResult.length).to.equal(0);
+          expect(arr[0]).to.equal('a');
+          expect(arr[1]).to.equal('b');
+
+          const list = new LinkedList<string>();
+          expect(list.length).to.equal(0);
+          const listResult = list.splice(0, 0, 'a', 'b');
+          expect(list.length).to.equal(2);
+          expect(listResult.length).to.equal(0);
+          expect(list.at(0)).to.equal('a');
+          expect(list.at(1)).to.equal('b');
+        });
+        it('appends to a non-empty list', () => {
+          const fixture = [1, 2];
+
+          const arr = Array(...fixture);
+          expect(arr.length).to.equal(fixture.length);
+          const arrResult = arr.splice(fixture.length, 0, 3, 4);
+          expect(arr.length).to.equal(4);
+          expect(arrResult.length).to.equal(0);
+          expect(arr[0]).to.equal(1);
+          expect(arr[1]).to.equal(2);
+          expect(arr[2]).to.equal(3);
+          expect(arr[3]).to.equal(4);
+
+          const list = new LinkedList<number>(...fixture);
+          expect(list.length).to.equal(fixture.length);
+          const listResult = list.splice(fixture.length, 0, 3, 4);
+          expect(list.length).to.equal(4);
+          expect(listResult.length).to.equal(0);
+          expect(list.at(0)).to.equal(1);
+          expect(list.at(1)).to.equal(2);
+          expect(list.at(2)).to.equal(3);
+          expect(list.at(3)).to.equal(4);
+        });
+        it('inserts to a non-empty list', () => {
+          const fixture = [3, 4];
+
+          const arr = Array(...fixture);
+          expect(arr.length).to.equal(fixture.length);
+          const arrResult = arr.splice(0, 0, 1, 2);
+          expect(arr.length).to.equal(4);
+          expect(arrResult.length).to.equal(0);
+          expect(arr[0]).to.equal(1);
+          expect(arr[1]).to.equal(2);
+          expect(arr[2]).to.equal(3);
+          expect(arr[3]).to.equal(4);
+
+          const list = new LinkedList<number>(...fixture);
+          expect(list.length).to.equal(fixture.length);
+          const listResult = list.splice(0, 0, 1, 2);
+          expect(list.length).to.equal(4);
+          expect(listResult.length).to.equal(0);
+          expect(list.at(0)).to.equal(1);
+          expect(list.at(1)).to.equal(2);
+          expect(list.at(2)).to.equal(3);
+          expect(list.at(3)).to.equal(4);
+        });
+        describe('start index', () => {
+          it('inserts at the start index', () => {
+            const fixture = [1, 2, 4];
+
+            const arr = Array(...fixture);
+            expect(arr.length).to.equal(fixture.length);
+            const arrResult = arr.splice(2, 0, 3);
+            expect(arr.length).to.equal(4);
+            expect(arrResult.length).to.equal(0);
+            expect(arr[0]).to.equal(1);
+            expect(arr[1]).to.equal(2);
+            expect(arr[2]).to.equal(3);
+            expect(arr[3]).to.equal(4);
+
+            const list = new LinkedList<number>(...fixture);
+            expect(list.length).to.equal(fixture.length);
+            const listResult = list.splice(2, 0, 3);
+            expect(list.length).to.equal(4);
+            expect(listResult.length).to.equal(0);
+            expect(list.at(0)).to.equal(1);
+            expect(list.at(1)).to.equal(2);
+            expect(list.at(2)).to.equal(3);
+            expect(list.at(3)).to.equal(4);
+          });
+          it('inserts at the -ve start index', () => {
+            const fixture = [1, 2, 4];
+
+            const arr = Array(...fixture);
+            expect(arr.length).to.equal(fixture.length);
+            const arrResult = arr.splice(-1, 0, 3);
+            expect(arr.length).to.equal(4);
+            expect(arrResult.length).to.equal(0);
+            expect(arr[0]).to.equal(1);
+            expect(arr[1]).to.equal(2);
+            expect(arr[2]).to.equal(3);
+            expect(arr[3]).to.equal(4);
+
+            const list = new LinkedList<number>(...fixture);
+            expect(list.length).to.equal(fixture.length);
+            const listResult = list.splice(-1, 0, 3);
+            expect(list.length).to.equal(4);
+            expect(listResult.length).to.equal(0);
+            expect(list.at(0)).to.equal(1);
+            expect(list.at(1)).to.equal(2);
+            expect(list.at(2)).to.equal(3);
+            expect(list.at(3)).to.equal(4);
+          });
+          it('inserts at the large -ve start index', () => {
+            const fixture = [3, 4];
+
+            const arr = Array(...fixture);
+            expect(arr.length).to.equal(fixture.length);
+            const arrResult = arr.splice(-fixture.length - 1, 0, 1, 2);
+            expect(arr.length).to.equal(4);
+            expect(arrResult.length).to.equal(0);
+            expect(arr[0]).to.equal(1);
+            expect(arr[1]).to.equal(2);
+            expect(arr[2]).to.equal(3);
+            expect(arr[3]).to.equal(4);
+
+            const list = new LinkedList<number>(...fixture);
+            expect(list.length).to.equal(fixture.length);
+            const listResult = list.splice(-fixture.length - 1, 0, 1, 2);
+            expect(list.length).to.equal(4);
+            expect(listResult.length).to.equal(0);
+            expect(list.at(0)).to.equal(1);
+            expect(list.at(1)).to.equal(2);
+            expect(list.at(2)).to.equal(3);
+            expect(list.at(3)).to.equal(4);
+          });
+        });
+      });
+      describe('insert & delete', () => {
+        it('works with an empty list', () => {
+          const arr = Array<string>();
+          expect(arr.length).to.equal(0);
+          const arrResult = arr.splice(0, 1, 'a', 'b');
+          expect(arr.length).to.equal(2);
+          expect(arrResult.length).to.equal(0);
+          expect(arr[0]).to.equal('a');
+          expect(arr[1]).to.equal('b');
+
+          const list = new LinkedList<string>();
+          expect(list.length).to.equal(0);
+          const listResult = list.splice(0, 1, 'a', 'b');
+          expect(list.length).to.equal(2);
+          expect(listResult.length).to.equal(0);
+          expect(list.at(0)).to.equal('a');
+          expect(list.at(1)).to.equal('b');
+        });
+        it('works with a non-empty list', () => {
+          const fixture = [1, 2, 2];
+
+          const arr = Array(...fixture);
+          expect(arr.length).to.equal(fixture.length);
+          const arrResult = arr.splice(2, 1, 3, 4);
+          expect(arr.length).to.equal(4);
+          expect(arrResult.length).to.equal(1);
+          expect(arrResult[0]).to.equal(2);
+          expect(arr[0]).to.equal(1);
+          expect(arr[1]).to.equal(2);
+          expect(arr[2]).to.equal(3);
+          expect(arr[3]).to.equal(4);
+
+          const list = new LinkedList<number>(...fixture);
+          expect(list.length).to.equal(fixture.length);
+          const listResult = list.splice(2, 1, 3, 4);
+          expect(list.length).to.equal(4);
+          expect(listResult.length).to.equal(1);
+          expect(listResult.at(0)).to.equal(2);
+          expect(list.at(0)).to.equal(1);
+          expect(list.at(1)).to.equal(2);
+          expect(list.at(2)).to.equal(3);
+          expect(list.at(3)).to.equal(4);
+        });
+        it('can replace a list', () => {
+          const fixture = [1, 2, 2];
+
+          const arr = Array(...fixture);
+          expect(arr.length).to.equal(fixture.length);
+          const arrResult = arr.splice(0, Infinity, 3, 4);
+          expect(arr.length).to.equal(2);
+          expect(arrResult.length).to.equal(3);
+          expect(arrResult[0]).to.equal(1);
+          expect(arrResult[1]).to.equal(2);
+          expect(arrResult[2]).to.equal(2);
+          expect(arr[0]).to.equal(3);
+          expect(arr[1]).to.equal(4);
+
+          const list = new LinkedList<number>(...fixture);
+          expect(list.length).to.equal(fixture.length);
+          const listResult = list.splice(0, Infinity, 3, 4);
+          expect(list.length).to.equal(2);
+          expect(listResult.length).to.equal(3);
+          expect(listResult.at(0)).to.equal(1);
+          expect(listResult.at(1)).to.equal(2);
+          expect(listResult.at(2)).to.equal(2);
+          expect(list.at(0)).to.equal(3);
+          expect(list.at(1)).to.equal(4);
+        });
+      });
+    });
     describe('truncate', () => {
       it('works with an empty list', () => {
         const list = new LinkedList<string>();
         expect(list.length).to.equal(0);
         list.truncate(0);
         expect(list.length).to.equal(0);
+      });
+      it('works with 1', () => {
+        const list = new LinkedList<string>('a', 'b');
+        expect(list.length).to.equal(2);
+        list.truncate(1);
+        expect(list.length).to.equal(1);
       });
       it('works with zero', () => {
         const list = new LinkedList<string>(...['a', 'b', 'c']);
@@ -2082,7 +2985,7 @@ describe('linked-list', () => {
         it('retrieves (shifts) much faster than arrays', function () {
           this.timeout(20_000);   // event loop is blocked, so this only affects the end
           const count = 200_000;
-          const speedFactor = 250;   // much faster than this, but affected by coverage
+          const speedFactor = 200;   // much faster than this, but affected by coverage
 
           const runList = (): number => {
             const list = pushList(count, returnCount);     // build the list quickly

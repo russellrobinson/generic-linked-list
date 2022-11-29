@@ -20,11 +20,11 @@ in TypeScript (which compiles to JavaScript), you can use it in code targeting b
 
 Arrays are a powerful and well-used data structure in both JavaScript and TypeScript.
 
-However, some operations are O(n) in Time Complexity. These include shift and unshift.
+However, some array operations are O(n) in Time Complexity. These include `shift` and `unshift`.
 
 This means working with large datasets is usually faster with a Linked List compared to an Array.
 
-### Time-Space trade off
+## Time-space trade off
 
 Linked lists are a classic time-space tradeoff when compared with arrays
 for some operations.
@@ -37,20 +37,46 @@ operations.
 
 Most linked list operations are similar in speed to array.
 
-#### Operations faster than array
-
+### Operations faster than array
 * shift
 * unshift
 
-_These operations are many hundreds to thousands of times faster than an array!_
+_These operations are **many hundreds to thousands of times faster** than an array!_
 
-#### Operations slower than array
+If you're working with lists of 10's or 100's of thousands of elements, and you need these operations,
+you should consider a linked list instead of an array for storing those elements.
 
+### Operations slower than array
+
+Some linked list operations are significantly slower than an array because the list must
+be traversed from beginning to some point in the list (usually all the way to the end).
+
+If your use case requires these operations on a large lists, then you should consider using
+an array or a doubly-linked list.
 * slice
 * at
 * pop
 * lastIndexOf
 * fill
+
+### Operations not implemented
+
+The following operations cannot be implemented efficiently in a singly-linked list and
+are not implemented.
+
+These can be implemented in a doubly-linked list, and such a data strcuture is planned for a
+future release.
+
+* reverse
+* reduceRight
+
+## Code size
+The majority of the code in this package is contained in unit tests.
+
+Code sizes:
+* The compiled Typescript is 7 kilobytes when minified.
+* The full JavaScript code including comments is around 40 kilobytes.
+* The unit tests are around 120 kilobytes.
 
 ## Getting started
 
@@ -72,6 +98,46 @@ With `npm`:
 npm --save-prod i generic-linked-list
 ```
 
+### Run the examples
+Plain JavaScript:
+```shell
+$ node dist/examples/plainjs.js
+A simple numeric list is [ 0, 1, 2 ]
+```
+
+Typescript (directly):
+```shell
+$ node dist/examples/example.js a b c
+Your linked list is a,b,c
+
+A list of numbers expanded using spread syntax [ 1, 2, 3 ]
+The same list converted to a string [1,2,3]
+
+Let's build a list of Person objects...
+A list of people expanded using spread syntax { name: 'John', age: 12, parent: { name: 'John', age: 42 } } { name: 'Kylie', age: 14 }
+The same list converted to a string {"name":"John","age":12,"parent":{"name":"John","age":42}},{"name":"Kylie","age":14}
+
+Here's the array after converting the people list to an array:
+[
+  { name: 'John', age: 12, parent: { name: 'John', age: 42 } },
+  { name: 'Kylie', age: 14 }
+]
+```
+
+Typescript (compiled):
+```shell
+$ node dist/examples/example.js a b c
+Your linked list is a,b,c
+[ 1, 2, 3 ]
+[1,2,3]
+{ name: 'John', age: 12, parent: { name: 'John', age: 42 } } { name: 'Kylie', age: 14 }
+{"name":"John","age":12,"parent":{"name":"John","age":42}},{"name":"Kylie","age":14}
+[
+  { name: 'John', age: 12, parent: { name: 'John', age: 42 } },
+  { name: 'Kylie', age: 14 }
+]
+```
+
 ### TypeScript examples
 
 #### Example 1
@@ -86,9 +152,9 @@ console.log(numList.toString());
 
 Expected output:
 
-```
-1 2 3
-1,2,3
+```text
+[ 1, 2, 3 ]
+[1,2,3]
 ```
 
 #### Example 2
@@ -108,7 +174,7 @@ console.log(peopleList.toString());
 
 Expected output:
 
-```
+```text
 { name: 'John', age: 12, parent: { name: 'John', age: 42 } } { name: 'Kylie', age: 14 }
 {"name":"John","age":12,"parent":{"name":"John","age":42}},{"name":"Kylie","age":14}
 ```
@@ -124,7 +190,7 @@ console.log(`Your linked list is ${[...sampleList]}`);
 
 Expected output:
 
-```
+```text
 Your linked list is 0,1,2
 ```
 
@@ -177,16 +243,16 @@ const list = LinkedList.from([1, 2]);
 
 ## Version History
 
-| Version | Date        | Description                                                                                                                                                                                                                                                                                                                |
-|--------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 2.0.0  | 21-Nov-2022 | Version 1 is mostly compatible with version 2, except for the following enhancements:<br/>*  Added support for negative indexes in these methods: `at`, `indexOf`, `includes`, `slice`.<br/>* Added the following methods: `entries`, `from`, `grow`, `join`, `keys`, `keysAsList`, `lastIndexOf`, `of`, `pop`, `truncate` |
-| 1.1.3  | 11-Nov-2022 | Documentation and test improvements.                                                                                                                                                                                                                                                                                       |
-| 1.1.2  | 15-Oct-2022 | Added missing `index.ts` file.                                                                                                                                                                                                                                                                                             |
-| 1.1.1  | 15-Oct-2022 | Test improvements.                                                                                                                                                                                                                                                                                                         |
-| 1.1.0  | 15-Oct-2022 | Added `slice` and `end` methods.                                                                                                                                                                                                                                                                                           |
-| 1.0.3  | 22-Sep-2022 | Documentation and test improvements.                                                                                                                                                                                                                                                                                       |
-| 1.0.1  | 17-Sep-2022 | Documentation improvements.                                                                                                                                                                                                                                                                                                |
-| 1.0.0  | 17-Sep-2022 | First "official" release.                                                                                                                                                                                                                                                                                                  |
+| Version   | Date        | Description                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+|-----------|-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 2.0.0-rc7 | 30-Nov-2022  | Version 2 is mostly compatible with version 1, except for the following:<br/>* Constructor and `from` enhancements may require some refactoring of your existing version 1 code.<br/>*  Added support for negative indexes in these methods: `at`, `indexOf`, `includes`, `slice`.<br/>* Added the following methods: `entries`, `flat`, `from`, `grow`, `join`, `keys`, `keysAsList`, `lastIndexOf`, `of`, `map`, `pop`, `splice`, `truncate`. |
+| 1.1.3     | 11-Nov-2022 | Documentation and test improvements.                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 1.1.2     | 15-Oct-2022 | Added missing `index.ts` file.                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 1.1.1     | 15-Oct-2022 | Test improvements.                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| 1.1.0     | 15-Oct-2022 | Added `slice` and `end` methods.                                                                                                                                                                                                                                                                                                                                                                                                                |
+| 1.0.3     | 22-Sep-2022 | Documentation and test improvements.                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 1.0.1     | 17-Sep-2022 | Documentation improvements.                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| 1.0.0     | 17-Sep-2022 | First "official" release.                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ## Node.js version
 
@@ -202,5 +268,5 @@ version of TypeScript.
 
 Russell Robinson is a Software Engineer with decades of experience across a range of industries.
 
-He lives in Melbourne, Australia.
+He lives in Melbourne, Australia and can be contacted via email (russellr@openconcepts.com.au).
 

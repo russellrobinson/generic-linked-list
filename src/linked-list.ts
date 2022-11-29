@@ -2,7 +2,6 @@
  * Copyright (c) 2022 Russell Robinson <russellr@openconcepts.com.au>
  */
 
-
 /**
  * A node in a singly-linked list, whose link and value can be changed.
  *
@@ -17,7 +16,7 @@ export class LinkedListNode<T> {
     this._next = undefined;
   }
 
-  get value(): Readonly<T> {
+  get value(): T {
     return this._value;
   }
 
@@ -39,15 +38,7 @@ export class LinkedListNode<T> {
  *
  * @typeParam T    the type of each value in the list
  */
-export class ReadonlyLinkedListNode<T> extends LinkedListNode<T> {
-  get value(): Readonly<T> {
-    return super.value as Readonly<T>;
-  }
-
-  get next(): ReadonlyLinkedListNode<T> | undefined {
-    return super.next;
-  }
-}
+export type ReadonlyLinkedListNode<T> = Readonly<LinkedListNode<T>>;
 
 /**
  * A node in a doubly-linked list.
@@ -187,6 +178,20 @@ export type LinkedListPredicate<T> = (value: T, index: number, list: LinkedList<
 export type LinkedListCallback<T> = (value: T, index: number, list: LinkedList<T>) => void
 
 /**
+ * The type for a callback function used in the `map` method.
+ * Modelled after the callback function defined for `Array.map`.
+ *
+ * The function is called with 3 parameters:
+ * - `value` is the value of the element in the list
+ * - `index` is the position of that value in the list, with 0 being the first index
+ * - `list` the LinkedList the `map()` was called on
+ *
+ * @typeParam T    the type of each value in the original list
+ * @typeParam U    the type returned by the callback
+ */
+export type MapCallback<T, U> = (value: T, index: number, list: LinkedList<T>) => U;
+
+/**
  * Internal function type for processing a value in the list.
  *
  * @typeParam T    the type of each value in the list
@@ -199,7 +204,7 @@ type IterationFunction<T> = (value: T, index: number) => boolean;
  * The maximum integer allowed to provide the linked list length in a constructor.
  * This mirrors the Array documentation here: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Array
  */
-const MAX_CONSTRUCTOR_LENGTH = (2 ^ 32) - 1;
+const MAX_CONSTRUCTOR_LENGTH = (2 ** 32) - 1;
 
 /**
  * Get the type of `T` for a LinkedList.
@@ -235,8 +240,8 @@ const MAX_CONSTRUCTOR_LENGTH = (2 ^ 32) - 1;
  * compatibility.
  *
  * However, a singly-linked list cannot easily or efficiently perform certain operations that you can with an Array, such as:
- *  - `sort`, `findLast`, `findLastIndex`, `reverse` - cannot be efficiently implemented and are excluded
- *  - `copyWithin`, `flat` - not yet implemented
+ *  - `sort`, `reverse`, `reduceRight` - cannot be efficiently implemented and are excluded
+ *  - `copyWithin` - not yet implemented
  *
  * ### Workaround
  * For missing methods or features, you can convert your LinkedList to an Array and perform the operation on that
@@ -287,36 +292,38 @@ export class LinkedList<T> implements Iterable<T> {
    * @protected.
    * @internal
    */
-  private _root: LinkedListNode<T> | undefined;
+  protected _root: LinkedListNode<T> | undefined;
   /**
    * The node at the end of the list.
-   * @protected.
+   * @protected
    * @internal
    */
   protected _end: LinkedListNode<T> | undefined;
+  /**
+   * The length of the list.
+   * @protected
+   * @internal
+   */
   protected _length: number;
 
   /**
-   * Construct the linked list, and load its contents using the given items.
-   */
-  constructor(...items: T[]);
-  /**
-   * Construct the linked list, of given length, setting all elements to `undefined`.
-   * Note: you should declare the list like this: `LinkedList<TYPE | undefined>`
-   * where TYPE is the type for your linked list elements.
+   * Construct the linked list, and load its contents as follows:
+   *  - if given an integer length, make a list of that length initialised with `undefined` values
+   *  - a list of arguments of type T
+   *  - any iterable of T
+   *  - another LinkedList; this performs a shallow copy of the other list's values
    *
+   * If no parameters are provided, an empty list is constructed.
+   *
+   * In the case of specifying a length, you should declare the list like this: `LinkedList<TYPE | undefined>`
+   * where TYPE is the non-undefined type for your linked list elements.
    * Unlike Array, we don't currently support the concept of "empty slots" in linked lists.
+   *
    */
+  constructor(...args: unknown[]);
   constructor(length: number);
-  /**
-   * Construct the linked list, and load its contents using the given iterator.
-   * @param it    any iterable of T's with which you want to load the list
-   */
+  constructor(...items: T[]);
   constructor(it?: Iterable<T>);
-  /**
-   * Construct the linked list by performing a shallow copy of another list's values
-   * @param list    the list to copy
-   */
   constructor(list?: LinkedList<T>);
   constructor(...args: unknown[]) {
     this._root = this._end = undefined;
@@ -447,7 +454,7 @@ export class LinkedList<T> implements Iterable<T> {
 
 
   /**
-   * Test if each element of the list returns `true` for the given predicate function .
+   * Test if each element of the list returns `true` for the given predicate function.
    * @param predicate   a function to test each element in the list
    * @param thisArg     a "this" value to bind to the predicate function
    * @returns `true` if all elements obey the predicate, otherwise `false`
@@ -473,6 +480,11 @@ export class LinkedList<T> implements Iterable<T> {
 
   /**
    * Fill elements in the list with the given value.
+   * This method mutates the list.
+   *
+   * @param value the value to assign to each element in the list
+   * @param start the index of the first element to fill
+   * @param end the index of the element to be excluded from filling
    * @returns the modified linked list
    *
    * #### Complexity: O(n) where n is the length of the linked list
@@ -486,6 +498,7 @@ export class LinkedList<T> implements Iterable<T> {
       let node = this._root;
 
       while (index < fromIndex) {
+        // istanbul ignore next
         if (node === undefined) {
           throw Error('LinkedList.fill logic failure (node is undefined looking for start)!');
         }
@@ -493,11 +506,12 @@ export class LinkedList<T> implements Iterable<T> {
         index++;
       }
       while (index < toIndex) {
+        // istanbul ignore next
         if (node === undefined) {
           throw Error('LinkedList.fill logic failure (node is undefined during fill)!');
         }
         node.value = value;
-        node = node?.next;
+        node = node.next;
         index++;
       }
     }
@@ -525,10 +539,14 @@ export class LinkedList<T> implements Iterable<T> {
 
   /**
    * Find the first element in the list where the predicate function returns `true`.
+   *
+   * As recommended for `Array.find`, do not mutate the list in your predicate function.
+   * Unlike Array, LinkedList does not make any guarantees as to behaviour if you do this.
+   *
    * @param predicate a function to test each element in the list
    * @param thisArg   a "this" value to bind to the predicate function
-   * @returns the found element or undefined if not found
-   *
+   * @returns the found element or `undefined` if not found
+
    * #### Complexity: O(n) where n is the length of the linked list
    */
   public find(predicate: LinkedListPredicate<T>, thisArg?: any): T | undefined {
@@ -543,7 +561,7 @@ export class LinkedList<T> implements Iterable<T> {
   }
 
   /**
-   * Find the first element in the list where the predicate function returns `true` and return the index of the element.
+   * Find the first element in the list where the predicate function returns `true` and return the index of that element.
    * @param predicate a function to test each element in the list
    * @param thisArg   a "this" value to bind to the predicate function
    * @returns the position in the list of the found element or -1 if not found
@@ -558,6 +576,45 @@ export class LinkedList<T> implements Iterable<T> {
       return false;     // and stop the loop
     }, predicate, thisArg);
 
+    return result;
+  }
+
+  /**
+   * Create a new list with any sub-list elements interpolated into it, recursively up to the specified depth.
+   * Sub-lists are expanded and replace the sub-list element in the list.
+   *
+   * For example,
+   * ```
+   *   1 -> 2 -> L -> 5 -> 6
+   *             |
+   *             3 -> 4
+   * ```
+   * becomes:
+   * ```
+   *   1 -> 2 -> 3 -> 4 -> 5 -> 6
+   * ```
+   * @param depth the depth at which to flatten; zero means nothing changes
+   * @returns a new linked list with sub-list elements interpolated into it
+   *
+   * #### Complexity: O(n * d) where n is the length of the linked list, and d is the depth of the recursion
+   */
+  public flat(depth = 1): RecursiveLinkedList<T> {
+    const result: RecursiveLinkedList<T> = new LinkedList<T | RecursiveLinkedList<T>>();
+    let node = this._root;
+
+    while (node !== undefined) {
+      const value = node.value;
+      if (LinkedList.isLinkedList(value) && depth > 0) {
+        const subList: RecursiveLinkedList<T> = value.flat(depth - 1) as RecursiveLinkedList<T>;//RecursiveLinkedList.isRecursiveLinkedList<T>(value) ? value.flat(depth - 1) : value;
+
+        for (const value of subList) {
+          result.push(value);
+        }
+      } else {
+        result.push(value);
+      }
+      node = node.next;
+    }
     return result;
   }
 
@@ -582,51 +639,59 @@ export class LinkedList<T> implements Iterable<T> {
 
   /**
    * Create a new LinkedList from a string.
-   * This is ugly and somewhat stupid, but `Array.from` does this, so LinkedList should too.
+   * The string is split into single characters and each character becomes an element in the list.
+   *
+   * This behaviour mirrors `Array.from(string)`.
+   *
    * @param str
    */
-  public static from<T>(str: string): LinkedList<T>;
+  public static from(str: string): LinkedList<string>;
   /**
-   * Create a new LinkedList from a string.
-   * This is ugly and somewhat stupid, but `Array.from` does this, so LinkedList should too.
+   * Create a new LinkedList from a string but map each character to a different value.
+   *
+   * The string is split into single characters and each character is mapped to another value and the result becomes
+   * an element in the list.
+   *
+   * This behaviour mirrors `Array.from(string)`.
+   *
    * @param str
-   * @param mapFn
-   * @param thisArg
+   * @param mapFn   if provided, every character to be added to the list is first passed through this function and the
+   *                `mapFn`'s return value is added to the list instead
+   * @param thisArg value to use as `this` when executing `mapFn`
    */
-  public static from<T, U = T>(str: string, mapFn: (v: T, k: number) => U, thisArg?: any): LinkedList<T>;
+  public static from<U = string>(str: string, mapFn: (v: string, k: number) => U, thisArg?: any): LinkedList<U>;
   /**
-   * Create a new LinkedList from an array.
+   * Create a new LinkedList from an array of values.
+   *
    * @param arr
    */
   public static from<T>(arr: ArrayLike<T>): LinkedList<T>;
   /**
-   * Create a new LinkedList from an array.
+   * Create a new LinkedList from an array of values, mapping each value to a different value.
+   *
    * @param arr
-   * @param mapFn
-   * @param thisArg
+   * @param mapFn   if provided, every value to be added to the list is first passed through this function and the
+   *                `mapFn`'s return value is added to the list instead
+   * @param thisArg value to use as `this` when executing `mapFn`
    */
-  public static from<T, U = T>(arr: ArrayLike<T>, mapFn: (v: T, k: number) => U, thisArg?: any): LinkedList<T>;
+  public static from<T, U = T>(arr: ArrayLike<T>, mapFn: (v: T, k: number) => U, thisArg?: any): LinkedList<U>;
   /**
-   * Create a new LinkedList from the given iterator.
-   * @param it      the iterator from which to create the linked list
+   * Create a new LinkedList from an iterator over some values.
+   *
+   * @param it
    */
   public static from<T>(it: Iterable<T>): LinkedList<T>;
   /**
-   * Create a new LinkedList from the given iterator.
-   * @param it      the iterator from which to create the linked list
-   * @param mapFn   if provided, every element to be added to the list is first passed through this function and the
-   *                `mapFn`'s return value is added to the array instead
+   * Create a new LinkedList from an iterator over some values, mapping each value to a different value.
+   *
+   * @param it
+   * @param mapFn   if provided, every value to be added to the list is first passed through this function and the
+   *                `mapFn`'s return value is added to the list instead
    * @param thisArg value to use as `this` when executing `mapFn`
    */
-  public static from<T, U = T>(it: Iterable<T>, mapFn: (v: T, k: number) => U, thisArg?: any): LinkedList<U> | LinkedList<T>;
-  /**
-   * Implementation of the `from` overloads.
-   * @param source
-   * @param mapFn
-   * @param thisArg
-   */
-  public static from<T, U = T>(source: Iterable<T> | string | ArrayLike<T>, mapFn?: (v: T, k: number) => U, thisArg?: any): LinkedList<U> | LinkedList<T> {
-    let theList: LinkedList<U> | LinkedList<T>;
+  public static from<T, U = T>(it: Iterable<T>, mapFn: (v: T, k: number) => U, thisArg?: any): LinkedList<U>;
+  public static from<T, U = T>(source: Iterable<T> | string | ArrayLike<T>, mapFn?: (v: T, k: number) => U, thisArg?: any): LinkedList<U> {
+    let theList: LinkedList<U> = new LinkedList<U>();
     let it: Iterable<T>;
 
     if (Array.isArray(source)) {
@@ -639,36 +704,35 @@ export class LinkedList<T> implements Iterable<T> {
     } else if ('length' in (source as object)) {
       it = Array.from(source)[Symbol.iterator]();
     } else {
+      // istanbul ignore next
       throw Error(`LinkedList.from does not support the type passed in`);
     }
 
-    if (mapFn === undefined) {
-      theList = new LinkedList<T>();
-      for (const t of it) {
-        theList.push(t);
-      }
-    } else {
-      theList = new LinkedList<U>();
-      let index = 0;
+    let index = 0;
+    const callMapFn = mapFn === undefined ? undefined : mapFn.bind(thisArg);
 
-      for (const t of it) {
-        if (thisArg !== undefined) {
-          theList.push(mapFn.bind(thisArg)(t, index));
-        } else {
-          theList.push(mapFn(t, index));
-        }
-        index++;
+    for (const t of it) {
+      if (callMapFn === undefined) {
+        theList.push(t as unknown as U);
+      } else {
+        theList.push(callMapFn(t, index));
       }
+      index++;
     }
     return theList;
   }
 
   /**
-   * Grow the linked list to the given length setting the new elements to the given value.
+   * Grow the linked list to the given length and set the new elements to the given value.
    *
-   * Use cases for `grow`:
-   *  - you want to create a list of a given size all filled with the same value; for an Array you would use
-   *    the Array(newLength) method followed by `Array.fill`, so use `LinkedList.grow` instead
+   * Use case for `grow`:
+   *  - you want to create a list of a given size all filled with the same value; for an Array you would construct
+   *    using `Array(length)` then call `Array.fill`.  For LinkedList, use `LinkedList.grow` instead.
+   *
+   * From version 2 of LinkedList, you can also use the same approach as Array, however, in that case
+   * you'll need to declare the list as `LinkedList<T | undefined>` because `new LinkedList(length)`
+   * fills the list with `undefined` - which may not be what you want.
+   * `grow` allows you to have a declaration of just `LinkedList<T>`.
    *
    * @param newLength the new length; if this is <= the current length, no operation is performed
    * @param value     the value to use for the new elements
@@ -686,12 +750,13 @@ export class LinkedList<T> implements Iterable<T> {
   }
 
   /**
-   * Test if the list contains the given value, using the sameValueZero algorithm for comparison.
+   * Test if the list contains the given value, using the algorithm for comparison.
    * @param testValue   the value to look for in the list
    * @param fromIndex   the index from which to start the search; from version 2.0.0, -ve numbers are supported
    * @returns `true` if the list includes the given value
    *
    * #### Complexity: O(n) where n is the length of the linked list
+   * @see LinkedList.sameValueZero
    */
   public includes(testValue: T, fromIndex = 0): boolean {
     let result = false;
@@ -737,7 +802,7 @@ export class LinkedList<T> implements Iterable<T> {
   /**
    * Test if the given value is a LinkedList.
    *
-   * Note that the `T` generic type's parameter cannot be checked in Typescript
+   * Note that the `T` generic type parameter cannot be verified using plain Typescript
    * and you must use other Typescript techniques to confirm matching types for the elements.
    *
    * @param maybeList   the value to test
@@ -748,7 +813,7 @@ export class LinkedList<T> implements Iterable<T> {
   }
 
   /**
-   * Join the elements of the linked list with the given string as a separator
+   * Join the elements of the linked list with the given string as a separator.
    *
    * #### Complexity: O(n) where n is the length of the linked list
    */
@@ -763,18 +828,18 @@ export class LinkedList<T> implements Iterable<T> {
   }
 
   /**
-   * Return the list of indexes in the linked list as a linked list.
-   * If you want this as a list, use `keysAsList`.
+   * Return the list of indexes in the linked list as an iterator.
+   * If you want this list as a LinkedList, use `keysAsList`.
    *
-   * #### Complexity: O(?) - uses Array.keys so, same complexity as that method - possibly O(n) or O(1)
+   * #### Complexity: O(?) - uses `Array.keys` so, same complexity as that method - possibly O(n) or O(1)
    */
   public keys(): IterableIterator<number> {
     return Array(this.length).keys();
   }
 
   /**
-   * Return the list of indexes in the linked list as a linked list.
-   * If you want this as an array, use `keys`.
+   * Return the list of indexes in the linked list as a LinkedList.
+   * If you want this as an iterator, use `keys`.
    *
    * #### Complexity: O(n) where n is the length of the linked list
    */
@@ -817,6 +882,27 @@ export class LinkedList<T> implements Iterable<T> {
   }
 
   /**
+   * Create a new LinkedList populated with the results of calling the provided function
+   * on every element in the LinkedList.
+   * @param callbackFn   the function to call to map each element
+   * @param thisArg      a "this" value to bind to the callback function
+   * @returns a new linked list with each element being the result of the callback function
+   *
+   * #### Complexity: O(n) where n is the length of the linked list
+   */
+  public map<U>(callbackFn: MapCallback<T, U>, thisArg?: any): LinkedList<U> {
+    const callFunc = callbackFn.bind(thisArg);
+    const result = new LinkedList<U>();
+    let index = 0;
+
+    for (const value of this) {
+      result.push(callFunc(value, index, this));
+      index++;
+    }
+    return result;
+  }
+
+  /**
    * Get the length of the list.
    * The length is maintained internally, so there is no cost to this request.
    * @returns the length of the list
@@ -839,9 +925,13 @@ export class LinkedList<T> implements Iterable<T> {
 
   /**
    * Remove the last element from the end of the list.
+   *
+   * `pop` requires complete traversal of the list, so you shouldn't use a singly-linked list
+   * if you need to use `pop` on large lists.
+   *
    * @returns the removed element or undefined if the list is empty
    *
-   * #### Complexity: O(n) where n is the length of the list
+   * #### Complexity: O(n) where n is the length of the list.
    */
   public pop(): T | undefined {
     let result: T | undefined = undefined;
@@ -852,15 +942,23 @@ export class LinkedList<T> implements Iterable<T> {
         // pop on a single element list is the same as shift
         //
         result = this.shift();
-      } else if (this._root !== undefined) {
+      } else {
+        // istanbul ignore if
+        if (this._root === undefined) {
+          throw Error('LinkedList.pop logic failure (_root is undefined)!');
+        }
+
         //
         // invariant: list contains at least 2 elements
         //
         let skipCount = this._length - 1;
         let node: LinkedListNode<T> | undefined = this._root;
         while (--skipCount > 0) {
+          // istanbul ignore next
           node = node?.next;
         }
+        // istanbul ignore if
+        // istanbul ignore next
         if (node?.next === undefined) {
           throw Error('LinkedList.pop logic failure (node.next is undefined)!');
         }
@@ -873,6 +971,7 @@ export class LinkedList<T> implements Iterable<T> {
         //
         // we're popping the last element, so it must be the last element!
         //
+        // istanbul ignore if
         if (node.next.next !== undefined) {
           throw Error('LinkedList.pop logic failure (did not skip to the end)!');
         }
@@ -885,6 +984,10 @@ export class LinkedList<T> implements Iterable<T> {
 
   /**
    * Append to the end of the list.
+   *
+   * `push` is very fast on both Array and LinkedList.  Even for very large LinkedList's,
+   * `push` remains typically O(1) complexity.
+   *
    * @param valueList a set of values to append to the list
    * @returns the new length of the list
    *
@@ -894,6 +997,7 @@ export class LinkedList<T> implements Iterable<T> {
     for (const value of valueList) {
       const node = this._createNode(value);
       if (this._root === undefined) {
+        // istanbul ignore if
         if (this._length !== 0) {
           throw Error('LinkedList.push logic failure (length > 0)!');
         }
@@ -901,6 +1005,7 @@ export class LinkedList<T> implements Iterable<T> {
         this._root = node;
         this._end = this._root;
       } else {
+        // istanbul ignore if
         if (this._end === undefined) {
           throw Error('LinkedList.push logic failure (end is undefined)!');
         }
@@ -914,12 +1019,12 @@ export class LinkedList<T> implements Iterable<T> {
   }
 
   /**
-   * Implements the sameValueZero algorithm described here:
+   * Implements the `sameValueZero` algorithm described here:
    *  - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Equality_comparisons_and_sameness#abstract_equality_strict_equality_and_same_value_in_the_specification
    *  - https://262.ecma-international.org/5.1/#sec-9.12
    * @param lhs   the left hand side of the equality test
    * @param rhs   the left hand side of the equality test
-   * @returns `true` if lhs and rhs have the same value as defined by the sameValueZero algorithm
+   * @returns `true` if lhs and rhs have the same value as defined by the `sameValueZero` algorithm
    */
   public static sameValueZero(lhs: unknown, rhs: unknown): boolean {
     let result = lhs === rhs;
@@ -934,6 +1039,9 @@ export class LinkedList<T> implements Iterable<T> {
 
   /**
    * Remove the first element from the list.
+   *
+   * `shift` is very fast on LinkedList and very slow on Array.
+   *
    * @returns the element removed from the front of the list, or `undefined` if the list is empty
    *
    * #### Complexity: O(1)
@@ -942,6 +1050,7 @@ export class LinkedList<T> implements Iterable<T> {
     let result: T | undefined = undefined;
 
     if (this._length !== 0) {
+      // istanbul ignore if
       if (this._root === undefined) {
         throw Error('LinkedList.shift logic failure (root is undefined)!');
       }
@@ -954,6 +1063,7 @@ export class LinkedList<T> implements Iterable<T> {
         // List is now empty
         //
         this._end = undefined;
+        // istanbul ignore if
         if (this._length !== 1) {
           throw Error('LinkedList.shift logic failure (length is wrong)!');
         }
@@ -967,9 +1077,10 @@ export class LinkedList<T> implements Iterable<T> {
    * Return a shallow copy of a part of the linked list, based on indexes of the elements in the list.
    * @param start optional zero-based starting index, at which to start copying the list
    * @param end   optional; the index of the first element to exclude from the returned list
-   * @returns a new list containing the specified elements from the original list
    *
    * `start` and `end` can be negative from version 2.0.0
+   *
+   * @returns a new list containing the specified elements from the original list
    *
    * #### Complexity: O(n) where n is the length of the linked list
    */
@@ -993,7 +1104,7 @@ export class LinkedList<T> implements Iterable<T> {
   }
 
   /**
-   * Test if at least one element of the list returns `true` for the given predicate function .
+   * Test if at least one element of the list returns `true` for the given predicate function.
    * @param predicate   a function to test each element in the list
    * @param thisArg     a "this" value to bind to the predicate function
    * @returns `true` if at least one element obeys the predicate, otherwise false
@@ -1014,7 +1125,88 @@ export class LinkedList<T> implements Iterable<T> {
   }
 
   /**
-   * Return a string representation of the list and its elements
+   * Change the linked list by removing or replacing existing elements and/or adding
+   * new elements.
+   * @param start       zero-based starting index, at which to start changing the list; a negative value
+   *                    counts back from the end of the list
+   * @param deleteCount the number of elements to remove beginning at the start index
+   * @param items       items to be inserted after the start index; if you don't provide any items then
+   *                    `splice` only removes elements from the list
+   * @returns a list containing the deleted elements
+   *
+   * #### Complexity: O(n) where n is the length of the linked list
+   */
+  public splice(start: number, deleteCount: number | undefined = this.length, ...items: T[]): LinkedList<T> {
+    const deletedList = new LinkedList<T>();
+    const fromIndex = this._computeStartIndex(start);
+    let currIndex = 0;
+    let numberToDelete = Number(deleteCount);    // allow conversion of undefined & null to zero
+
+    if (fromIndex === 0) {
+      //
+      // delete elements
+      //
+      while (numberToDelete-- > 0 && this.length > 0) {
+        const value = this.shift() as T;
+
+        deletedList.push(value);
+      }
+      //
+      // insert new items
+      //
+      this.unshift(...items);
+    } else {
+      let node = this._root;
+
+      //
+      // loop to the node just before the start
+      //
+      while (++currIndex < fromIndex) {
+        // istanbul ignore next
+        node = node?.next;
+      }
+      // istanbul ignore next
+      if (node === undefined) {
+        throw Error('LinkedList.splice logic failure (node is undefined looking for start)!');
+      }
+      //
+      // delete elements
+      //
+      while (numberToDelete-- > 0 && node.next !== undefined) {
+        const value = node.next.value;
+
+        deletedList.push(value);
+        node.next = node.next.next;
+        this._length--;
+        if (node.next === undefined) {
+          this._end = node;
+        }
+      }
+      //
+      // insert new elements
+      //
+      if (node.next === undefined) {
+        //
+        // we must be appending
+        //
+        this.push(...items);
+      } else {
+        //
+        // insert new items at this point
+        //
+        for (const value of items) {
+          const next = node.next;
+          node.next = this._createNode(value);
+          node.next.next = next;
+          this._length++;
+        }
+      }
+    }
+    return deletedList;
+  }
+
+  /**
+   * Return a string representation of the list and its elements.
    *
    * #### Complexity: O(n) where n is the length of the linked list
    */
@@ -1051,6 +1243,9 @@ export class LinkedList<T> implements Iterable<T> {
 
   /**
    * Insert at the beginning of a list
+   *
+   * `unshift` is very fast on LinkedList and very slow on Array.
+   *
    * @param valueList
    * @returns the new length of the list
    *
@@ -1091,7 +1286,7 @@ export class LinkedList<T> implements Iterable<T> {
   }
 
   /**
-   * Return an iterator for the list
+   * Return an iterator for the list.
    */
   [Symbol.iterator]() {
     return new ListIterator<T>(this._root);
@@ -1102,6 +1297,7 @@ export class LinkedList<T> implements Iterable<T> {
    * @param index   an optional index indicating the start point in the list
    * @returns a positive index to start from
    * @protected
+   * @internal
    */
   protected _computeStartIndex(index: number | undefined): number {
     let result;
@@ -1121,6 +1317,7 @@ export class LinkedList<T> implements Iterable<T> {
    * @param index   an optional index indicating the end point in the list
    * @returns a positive index to end at
    * @protected
+   * @internal
    */
   protected _computeEndIndex(index: number | undefined): number {
     let result;
@@ -1167,14 +1364,18 @@ export class LinkedList<T> implements Iterable<T> {
    * Shrink the list to the given length (or keep its current length).
    * @param newLength   must be a value <= the current length; -ve numbers are set to zero
    * @protected
+   * @internal
    */
   protected _shrink(newLength: number) {
+    // istanbul ignore if
     if (newLength < 0) {
       newLength = 0;
     }
+    // istanbul ignore if
     if (newLength > this._length) {
       throw Error('LinkedList._shrink logic invariant failed!');
     }
+    // istanbul ignore if
     if (newLength === this._length) {
       // no-op
     } else if (newLength === 0) {
@@ -1184,7 +1385,11 @@ export class LinkedList<T> implements Iterable<T> {
       this._length = 0;
       this._root = undefined;
       this._end = undefined;
-    } else if (this._root !== undefined) {
+    } else {
+      // istanbul ignore if
+      if (this._root === undefined) {
+        throw Error('LinkedList._shrink logic invariant failed (root undefined)!');
+      }
       if (newLength === 1) {
         //
         // keep just the first element
@@ -1199,8 +1404,11 @@ export class LinkedList<T> implements Iterable<T> {
         let skipCount = newLength - 1;
         let node: LinkedListNode<T> | undefined = this._root;
         while (--skipCount > 0) {
+          // istanbul ignore next
           node = node?.next;
         }
+        // istanbul ignore if
+        // istanbul ignore next
         if (node?.next === undefined) {
           throw Error('LinkedList._shrink logic failure (node.next is undefined)!');
         }
@@ -1212,12 +1420,13 @@ export class LinkedList<T> implements Iterable<T> {
   }
 
   /* TODO
-   map
-   flat
    flatMap
    reduce
    reduceRight
-   splice
-   `findLast`, `findLastIndex`
    */
 }
+
+/**
+ * The shape of a recursive or nested LinkedList.
+ */
+export type RecursiveLinkedList<T> = LinkedList<T | RecursiveLinkedList<T>>;
