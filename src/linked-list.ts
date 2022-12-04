@@ -348,7 +348,7 @@ export class LinkedList<T> implements Iterable<T> {
     // check and implement list copy
     //
     if (!complete) {
-      if (args.length === 1 && typeof args[0] === 'object' && '_root' in (args[0] as any)) {
+      if (args.length === 1 && LinkedList.isObject(args[0]) && '_root' in (args[0] as any)) {
         const list = args[0] as LinkedList<T>;
         for (const t of list) {
           this.push(t);
@@ -361,7 +361,7 @@ export class LinkedList<T> implements Iterable<T> {
     // check and implement iterator overload
     //
     if (!complete) {
-      if (args.length === 1 && typeof args[0] === 'object' && 'next' in (args[0] as any)) {
+      if (args.length === 1 && LinkedList.isIterable(args[0])) {
         const it = args[0] as Iterable<T>;
         for (const t of it) {
           this.push(t);
@@ -983,6 +983,21 @@ export class LinkedList<T> implements Iterable<T> {
   }
 
   /**
+   * Append to the end of the list, all the items in the given iterator.
+   *
+   * `push` is very fast on both Array and LinkedList.  Even for very large LinkedList's,
+   * `push` remains typically O(1) complexity.
+   *
+   * Note that Array does not have an overload that accepts an iterator, but for large appends
+   * an iterator uses much less stack space than spread syntax.
+   *
+   * @param it    an iterator over a set of values
+   * @returns the new length of the list
+   *
+   * #### Complexity: O(n) where n is the number of values being appended - typically O(1)
+   */
+  public push(it: Iterable<T>): number;
+  /**
    * Append to the end of the list.
    *
    * `push` is very fast on both Array and LinkedList.  Even for very large LinkedList's,
@@ -993,8 +1008,19 @@ export class LinkedList<T> implements Iterable<T> {
    *
    * #### Complexity: O(n) where n is the number of values being appended - typically O(1)
    */
-  public push(...valueList: T[]): number {
-    for (const value of valueList) {
+  public push(...valueList: T[]): number;
+  public push(...args: unknown[]): number {
+    let it: Iterable<T>;
+
+    //
+    // check the different overloads
+    //
+    if (args.length === 1 && LinkedList.isIterable(args[0])) {
+      it = args[0] as Iterable<T>;
+    } else {
+      it = (args as T[])[Symbol.iterator]();
+    }
+    for (const value of it) {
       const node = this._createNode(value);
       if (this._root === undefined) {
         // istanbul ignore if
@@ -1417,6 +1443,24 @@ export class LinkedList<T> implements Iterable<T> {
         this._length = newLength;
       }
     }
+  }
+
+  /**
+   * Test if the given argument is a true object.
+   *
+   * @param arg
+   */
+  public static isObject(arg: unknown): boolean {
+    return arg !== null && typeof arg === 'object';
+  }
+
+  /**
+   * Test if the given argument is an Iterable.
+   *
+   * @param arg
+   */
+  public static isIterable(arg: unknown): boolean {
+    return LinkedList.isObject(arg) && 'next' in (arg as any) && typeof (arg as any)['next'] === 'function';
   }
 
   /* TODO

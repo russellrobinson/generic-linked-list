@@ -643,6 +643,18 @@ describe('linked-list', () => {
         expect(arr.push()).to.equal(0);
         expect(list.push()).to.equal(0);
       });
+      describe('iterator', () => {
+        it('accepts an iterator', () => {
+          const setFixture = new Set([1, 2, 3, 1]);
+          const list = new LinkedList<number>();
+
+          const result = list.push(setFixture.values());
+          expect(result).to.equal(3);
+          expect(list.at(0)).to.equal(1);
+          expect(list.at(1)).to.equal(2);
+          expect(list.at(2)).to.equal(3);
+        });
+      });
     });
     describe('unshift', () => {
       it('returns the new length', () => {
