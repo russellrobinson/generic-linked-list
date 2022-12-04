@@ -51,13 +51,14 @@ you should consider a linked list instead of an array for storing those elements
 Some linked list operations are significantly slower than an array because the list must
 be traversed from beginning to some point in the list (usually all the way to the end).
 
-If your use case requires these operations on a large lists, then you should consider using
-an array or a doubly-linked list.
 * slice
 * at
 * pop
 * lastIndexOf
 * fill
+
+If your use case requires these operations on a large lists, then you should consider using
+a different data structure (such as Array).
 
 ### Operations not implemented
 
@@ -245,7 +246,7 @@ const list = LinkedList.from([1, 2]);
 
 | Version   | Date        | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 |-----------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 2.0.0-rc8 | 4-Dec-2022  | Version 2 is mostly compatible with version 1, except for the following:<br/>* Constructor and `from` enhancements may require some refactoring of your existing version 1 code.<br/>* The `push` method also accepts an iterator.  `Array.push` does not support this. <br/>*  Added support for negative indexes in these methods:<ul><li>`at`<li>`indexOf`<li>`includes`<li>`slice`</ul><br/>* Added the following methods:<ul><li>`entries`<li>`flat`<li>`from`<li>`grow`<li>`join`<li>`keys`<li>`keysAsList`<li>`lastIndexOf`<li>`of`<li>`map`<li>`pop`<li>`splice`<li>`truncate`</ul> |
+| 2.0.0-rc9 | 4-Dec-2022  | Version 2 is mostly compatible with version 1, except for the following:<br/>* Constructor and `from` enhancements may require some refactoring of your existing version 1 code.<br/>* The `push` method also accepts an iterator.  `Array.push` does not support this. <br/>*  Added support for negative indexes in these methods:<ul><li>`at`<li>`indexOf`<li>`includes`<li>`slice`</ul><br/>* Added the following methods:<ul><li>`entries`<li>`flat`<li>`from`<li>`grow`<li>`join`<li>`keys`<li>`keysAsList`<li>`lastIndexOf`<li>`of`<li>`map`<li>`pop`<li>`splice`<li>`truncate`</ul> |
 | 1.1.3     | 11-Nov-2022 | Documentation and test improvements.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | 1.1.2     | 15-Oct-2022 | Added missing `index.ts` file.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | 1.1.1     | 15-Oct-2022 | Test improvements.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |

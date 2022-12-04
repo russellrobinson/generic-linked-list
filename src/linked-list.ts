@@ -424,9 +424,7 @@ export class LinkedList<T> implements Iterable<T> {
 
     values.forEach(value => {
       if (LinkedList.isLinkedList<T>(value)) {
-        for (const elem of value) {
-          result.push(elem as T);
-        }
+        result.push((value as LinkedList<T>).values())
       } else {
         result.push(value as T);
       }

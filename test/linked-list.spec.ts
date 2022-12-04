@@ -3071,9 +3071,9 @@ describe('linked-list', () => {
         });
       });
       describe('slice', () => {
-        xit('is slower than array', function () {
-          this.timeout(20_000);   // event loop is blocked, so this only affects the end
-          const count = 60_000;
+        it('is slower than array', function () {
+          this.timeout(40_000);   // event loop is blocked, so this only affects the end
+          const count = 30_000;
           const speedFactor = 100;
           const sliceSize = 1_000;
 
@@ -3118,8 +3118,8 @@ describe('linked-list', () => {
       });
 
       describe('concat', () => {
-        it('is similar to array', function () {
-          this.timeout(30_000);   // event loop is blocked, so this only affects the end
+        it('is slower than array', function () {
+          this.timeout(40_000);   // event loop is blocked, so this only affects the end
           const startSize = 200_000;
           const appendSize = 1_000;
           const count = 500;
@@ -3162,7 +3162,7 @@ describe('linked-list', () => {
 
           // console.log(`Array ${arrayTimeMs}ms`);
           // console.log(`List ${listTimeMs}ms`);
-          console.log(`List is ${(listTimeMs / arrayTimeMs).toFixed(1)} times slower than Array for slice retrieval`);
+          console.log(`List is ${(listTimeMs / arrayTimeMs).toFixed(1)} times slower than Array for concat`);
           // expect(listTimeMs / arrayTimeMs).to.be.greaterThan(speedFactor);
         });
       });
