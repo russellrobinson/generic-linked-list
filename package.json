@@ -1,6 +1,6 @@
 {
   "name": "generic-linked-list",
-  "version": "2.0.0-rc9",
+  "version": "2.0.0-rc10",
   "description": "Linked Lists using Generics",
   "license": "MIT",
   "author": "Russell Robinson <russellr@openconcepts.com.au>",

@@ -2272,6 +2272,116 @@ describe('linked-list', () => {
       });
     });
 
+    describe('reduce', () => {
+      const sumAll = (prev, current) => {
+        return prev + current;
+      };
+
+      describe('without initialValue', () => {
+        it('works with a list size > 1', () => {
+          const fixture: number[] = [1, 2, 3, 4];
+          const arrResult = fixture.reduce(sumAll);
+
+          expect(arrResult).to.equal(10);
+
+          const list = new LinkedList<number>(fixture[Symbol.iterator]());
+          const listResult = list.reduce(sumAll);
+
+          expect(listResult).to.equal(10);
+        });
+        it('works with a list size == 1', () => {
+          const fixture: number[] = [2];
+          const arrResult = fixture.reduce(sumAll);
+
+          expect(arrResult).to.equal(2);
+
+          const list = new LinkedList<number>(fixture[Symbol.iterator]());
+          const listResult = list.reduce(sumAll);
+
+          expect(listResult).to.equal(2);
+        });
+        it('throws with list size == 0', () => {
+          // noinspection JSMismatchedCollectionQueryUpdate
+          const fixture: number[] = [];
+
+          expect(() => fixture.reduce(sumAll)).to.throw(TypeError, /Reduce of empty array with no initial value/);
+
+          const list = new LinkedList<number>(fixture[Symbol.iterator]());
+          expect(() => list.reduce(sumAll)).to.throw(TypeError, /Reduce of empty list with no initial value/);
+        });
+      });
+      describe('with initialValue', () => {
+        it('works with a list size > 1', () => {
+          const fixture: number[] = [1, 2, 3, 4];
+          const arrResult = fixture.reduce(sumAll, 5);
+
+          expect(arrResult).to.equal(15);
+
+          const list = new LinkedList<number>(fixture[Symbol.iterator]());
+          const listResult = list.reduce(sumAll, 5);
+
+          expect(listResult).to.equal(15);
+        });
+        it('works with a list size == 1', () => {
+          const fixture: number[] = [2];
+          const arrResult = fixture.reduce(sumAll, 5);
+
+          expect(arrResult).to.equal(7);
+
+          const list = new LinkedList<number>(fixture[Symbol.iterator]());
+          const listResult = list.reduce(sumAll, 5);
+
+          expect(listResult).to.equal(7);
+        });
+        it('throws with list size == 0', () => {
+          // noinspection JSMismatchedCollectionQueryUpdate
+          const fixture: number[] = [];
+
+          const arrResult = fixture.reduce(sumAll, 5);
+          expect(arrResult).to.equal(5);
+
+          const list = new LinkedList<number>(fixture[Symbol.iterator]());
+          const listResult = list.reduce(sumAll, 5);
+          expect(listResult).to.equal(5);
+        });
+      });
+      describe('index parameter', () => {
+        //
+        // these functions will only double the entire arr/list if an initialValue of 0 is passed in;
+        // otherwise they will skip doubling the first value in the list
+        //
+        const arrDoubler = (prev, current, index, arr) => {
+          return prev + current + arr[index];
+        };
+        const listDoubler = (prev, current, index, list) => {
+          return prev + current + list.at(index);
+        };
+
+        it('passes the index parameter correctly with an initialValue', () => {
+          const fixture: number[] = [1, 2, 3, 4];
+          const arrResult = fixture.reduce(arrDoubler, 0);
+
+          expect(arrResult).to.equal(20);
+
+          const list = new LinkedList<number>(fixture[Symbol.iterator]());
+          const listResult = list.reduce(listDoubler, 0);
+
+          expect(listResult).to.equal(20);
+        });
+        it('passes the index parameter correctly withouth an initialValue', () => {
+          const fixture: number[] = [1, 2, 3, 4];
+          const arrResult = fixture.reduce(arrDoubler);
+
+          expect(arrResult).to.equal(19);
+
+          const list = new LinkedList<number>(fixture[Symbol.iterator]());
+          const listResult = list.reduce(listDoubler);
+
+          expect(listResult).to.equal(19);
+        });
+      });
+    });
+
     describe('slice', () => {
       const fixture: number[] = [1, 2, 3, 4];
 

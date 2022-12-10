@@ -192,6 +192,21 @@ export type LinkedListCallback<T> = (value: T, index: number, list: LinkedList<T
 export type MapCallback<T, U> = (value: T, index: number, list: LinkedList<T>) => U;
 
 /**
+ * The type for a callback function used in the `reduce` method.
+ * Modelled after the callback function defined for `Array.reduce`.
+ *
+ * The function is called with 3 parameters:
+ * - `accumulator` is the value resulting from the previous call to the function
+ * - `currentValue` the value of the current element in the list
+ * - `currentIndex` the index position of `currentValue` in the list
+ * - `list` the list upon which `reduce` was called
+ *
+ * @typeParam T    the type of each value in the original list
+ * @typeParam U    the type returned by the callback
+ */
+export type ReduceCallback<T> = (accumulator: T, currentValue: T, currentIndex: number, list: LinkedList<T>) => T;
+
+/**
  * Internal function type for processing a value in the list.
  *
  * @typeParam T    the type of each value in the list
@@ -424,7 +439,7 @@ export class LinkedList<T> implements Iterable<T> {
 
     values.forEach(value => {
       if (LinkedList.isLinkedList<T>(value)) {
-        result.push((value as LinkedList<T>).values())
+        result.push((value as LinkedList<T>).values());
       } else {
         result.push(value as T);
       }
@@ -1043,6 +1058,71 @@ export class LinkedList<T> implements Iterable<T> {
   }
 
   /**
+   * The `reduce` method executes a user-supplied callback function (`reducerCallbackFn`) on each element of the list,
+   * in left-to-right (first-to-last) order, passing in the return value from the calculation on the preceding element.
+   * The final result of running the `reducerCallbackFn` across all elements of the list is a single value.
+   *
+   * The first time that the callback is run there is no "return value of the previous calculation".
+   * Therefore, either the optional `initialValue` parameter is used or, if that is not supplied,
+   * the list element at index 0 is used as the initial value and iteration starts from
+   * the next element (index 1 instead of index 0).
+   *
+   * Regarding the optional `initialValue` parameter:  if `initialValue` is supplied, that also causes `currentValue`
+   * to be initialized to the first value in the list. If `initialValue` is not supplied, `accumulator` is initialized
+   * to the first value in the list, and `currentValue` is initialized to the second value in the list.
+   *
+   * Regarding the `reducerCallbackFn` callback function...
+   *
+   * Its return value becomes the value of the `accumulator` parameter on the next invocation of `reducerCallbackFn`.
+   * For the last invocation, the return value becomes the return value of `reduce`.
+   *
+   * `reducerCallbackFn` is called with the following arguments:
+   *
+   *  * `accumulator`
+   *    The value resulting from the previous call to `reducerCallbackFn`. On first call, `initialValue` if supplied,
+   *    otherwise the value of `list.at(0)`.
+   *
+   *  * `currentValue`
+   *    The value of the current element. On first call, the value of `list.at(0)` if `initialValue` was supplied,
+   *    otherwise the value of `list.at(1)`.
+   *
+   *  * `currentIndex`
+   *    The index position of `currentValue` in list. On first call, 0 if `initialValue` was supplied, otherwise 1.
+   *
+   *  * `list`
+   *    The list `reduce` was called upon.
+   *
+   * @typeParam U the return type of the `reducerCallbackFn` callback function, and the return type of `reduce` itself
+   * @param reducerCallbackFn the `reducerCallbackFn` callback function
+   * @param initialValue      an optional value to which `accumulator` is initialized the first time the callback is called.
+   */
+  public reduce(reducerCallbackFn: ReduceCallback<T>, initialValue?: T): T {
+    let result: T;
+    let index;
+    let it = this[Symbol.iterator]();
+
+    let itResult = it.next();
+
+    if (initialValue === undefined) {
+      if (this.length === 0) {
+        throw TypeError(`Reduce of empty list with no initial value`);
+      }
+      result = itResult.value;
+      itResult = it.next();
+      index = 1;
+    } else {
+      result = initialValue;
+      index = 0;
+    }
+    while (!itResult.done) {
+      result = reducerCallbackFn(result, itResult.value, index, this);
+      itResult = it.next();
+      index++;
+    }
+    return result;
+  }
+
+  /**
    * Implements the `sameValueZero` algorithm described here:
    *  - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Equality_comparisons_and_sameness#abstract_equality_strict_equality_and_same_value_in_the_specification
    *  - https://262.ecma-international.org/5.1/#sec-9.12
@@ -1463,8 +1543,6 @@ export class LinkedList<T> implements Iterable<T> {
 
   /* TODO
    flatMap
-   reduce
-   reduceRight
    */
 }
 
