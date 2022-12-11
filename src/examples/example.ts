@@ -20,7 +20,7 @@ console.log(`A list of numbers expanded using spread syntax`, ...numList);
 console.log(`The same list converted to a string`, numList.toString());
 
 console.log(``);
-console.log(`Let's build a list of Person objects...`);
+console.log(`Let us build a list of Person objects...`);
 type Person = { name: string, age: number; parent?: Person };
 const peopleList = new LinkedList<Person>();
 peopleList.push({name: 'John', age: 12, parent: {name :'John', age: 42}}, {name: 'Kylie', age: 14});

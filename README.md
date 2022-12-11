@@ -100,21 +100,21 @@ npm --save-prod i generic-linked-list
 ```
 
 ### Run the examples
-Plain JavaScript:
+**Plain JavaScript:**
 ```shell
 $ node dist/examples/plainjs.js
 A simple numeric list is [ 0, 1, 2 ]
 ```
 
-Typescript (directly):
+**Typescript (directly):**
 ```shell
-$ node dist/examples/example.js a b c
+$ ts-node src/examples/example.ts a b c 
 Your linked list is a,b,c
 
 A list of numbers expanded using spread syntax [ 1, 2, 3 ]
 The same list converted to a string [1,2,3]
 
-Let's build a list of Person objects...
+Let us build a list of Person objects...
 A list of people expanded using spread syntax { name: 'John', age: 12, parent: { name: 'John', age: 42 } } { name: 'Kylie', age: 14 }
 The same list converted to a string {"name":"John","age":12,"parent":{"name":"John","age":42}},{"name":"Kylie","age":14}
 
@@ -125,23 +125,16 @@ Here's the array after converting the people list to an array:
 ]
 ```
 
-Typescript (compiled):
+**Typescript (compiled):**
 ```shell
+$ yarn build
 $ node dist/examples/example.js a b c
-Your linked list is a,b,c
-[ 1, 2, 3 ]
-[1,2,3]
-{ name: 'John', age: 12, parent: { name: 'John', age: 42 } } { name: 'Kylie', age: 14 }
-{"name":"John","age":12,"parent":{"name":"John","age":42}},{"name":"Kylie","age":14}
-[
-  { name: 'John', age: 12, parent: { name: 'John', age: 42 } },
-  { name: 'Kylie', age: 14 }
-]
 ```
+_Same output as above._
 
 ### TypeScript examples
 
-#### Example 1
+**Example 1**
 
 ```typescript
 import { LinkedList } from 'generic-linked-list';
@@ -158,7 +151,7 @@ Expected output:
 [1,2,3]
 ```
 
-#### Example 2
+**Example 2**
 
 ```typescript
 import { LinkedList } from 'generic-linked-list';
@@ -180,7 +173,7 @@ Expected output:
 {"name":"John","age":12,"parent":{"name":"John","age":42}},{"name":"Kylie","age":14}
 ```
 
-#### Example 3 (plain JavaScript)
+**Example 3 (plain JavaScript)**
 
 ```javascript
 const LinkedList = require('generic-linked-list').LinkedList;
@@ -210,7 +203,7 @@ To access example code that actually runs:
 - download the package;
 - look in the `src/examples` folder.
 
-## Version 2 Compatiblility
+## Version 2 Compatibility
 Version 2 aims to be even closer to a drop-in replacement for Array.
 
 Version 2 implements additional constructor options to make LinkedList more similar to Array construction.
@@ -244,16 +237,16 @@ const list = LinkedList.from([1, 2]);
 
 ## Version History
 
-| Version    | Date        | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-|------------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 2.0.0-rc10 | 10-Dec-2022 | Version 2 is mostly compatible with version 1, except for the following:<br/>* Constructor and `from` enhancements may require some refactoring of your existing version 1 code.<br/>* The `push` method also accepts an iterator.  `Array.push` does not support this. <br/>*  Added support for negative indexes in these methods:<ul><li>`at`<li>`indexOf`<li>`includes`<li>`slice`</ul><br/>* Added the following methods:<ul><li>`entries`<li>`flat`<li>`from`<li>`grow`<li>`join`<li>`keys`<li>`keysAsList`<li>`lastIndexOf`<li>`of`<li>`map`<li>`pop`<li>`reduce`<li>`splice`<li>`truncate`</ul> |
-| 1.1.3      | 11-Nov-2022 | Documentation and test improvements.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| 1.1.2      | 15-Oct-2022 | Added missing `index.ts` file.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| 1.1.1      | 15-Oct-2022 | Test improvements.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| 1.1.0      | 15-Oct-2022 | Added `slice` and `end` methods.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| 1.0.3      | 22-Sep-2022 | Documentation and test improvements.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| 1.0.1      | 17-Sep-2022 | Documentation improvements.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| 1.0.0      | 17-Sep-2022 | First "official" release.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Version    | Date        | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+|------------|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 2.0.0-rc11 | 11-Dec-2022 | Version 2 is mostly compatible with version 1, except for the following:<br/>* Constructor and `from` enhancements may require some refactoring of your existing version 1 code.<br/>* The `push` method also accepts an iterator.  `Array.push` does not support this. <br/>*  Added support for negative indexes in these methods:<ul><li>`at`<li>`indexOf`<li>`includes`<li>`slice`</ul><br/>* Added the following methods:<ul><li>`entries`<li>`flat`<li>`flatMap`<li>`from`<li>`grow`<li>`join`<li>`keys`<li>`keysAsList`<li>`lastIndexOf`<li>`of`<li>`map`<li>`pop`<li>`reduce`<li>`splice`<li>`truncate`</ul> |
+| 1.1.3      | 11-Nov-2022 | Documentation and test improvements.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| 1.1.2      | 15-Oct-2022 | Added missing `index.ts` file.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 1.1.1      | 15-Oct-2022 | Test improvements.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 1.1.0      | 15-Oct-2022 | Added `slice` and `end` methods.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| 1.0.3      | 22-Sep-2022 | Documentation and test improvements.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| 1.0.1      | 17-Sep-2022 | Documentation improvements.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| 1.0.0      | 17-Sep-2022 | First "official" release.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 ## Node.js version
 

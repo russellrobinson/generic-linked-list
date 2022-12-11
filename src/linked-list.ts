@@ -188,6 +188,7 @@ export type LinkedListCallback<T> = (value: T, index: number, list: LinkedList<T
  *
  * @typeParam T    the type of each value in the original list
  * @typeParam U    the type returned by the callback
+ * @see LinkedList.map
  */
 export type MapCallback<T, U> = (value: T, index: number, list: LinkedList<T>) => U;
 
@@ -203,6 +204,7 @@ export type MapCallback<T, U> = (value: T, index: number, list: LinkedList<T>) =
  *
  * @typeParam T    the type of each value in the original list
  * @typeParam U    the type returned by the callback
+ * @see LinkedList.reduce
  */
 export type ReduceCallback<T> = (accumulator: T, currentValue: T, currentIndex: number, list: LinkedList<T>) => T;
 
@@ -273,6 +275,9 @@ const MAX_CONSTRUCTOR_LENGTH = (2 ** 32) - 1;
  * Depending on the version of the `generic-linked-list` package, some methods that can be implemented may not
  * _yet_ be implemented.  In this case, convert your list to an array and use array methods instead.
  * See the above **Workaround** section for an example of how to achieve this.
+ *
+ * For those methods that cannot be implemented without a large performance issue, you should consider
+ * a different data structure (such as Array or Map).
  *
  * ## Unit tests
  * This package includes unit tests that demonstrate operational and speed test results clearly.  The push test, however,
@@ -627,6 +632,41 @@ export class LinkedList<T> implements Iterable<T> {
         result.push(value);
       }
       node = node.next;
+    }
+    return result;
+  }
+
+  /**
+   * Create a new LinkedList populated with the results of calling the provided function
+   * on every element in the LinkedList and then flattening the list by a depth of 1.
+   *
+   * It is identical to a map() followed by a `flat` of depth 1 (list.map(...args).flat()),
+   * but slightly more efficient than calling those two methods separately.
+   *
+   * @param callbackFn   the function to call to map each element
+   * @param thisArg      a "this" value to bind to the callback function
+   * @returns a new linked list with each element being the result of the callback function
+   *
+   * #### Complexity: O(n) where n is the length of the linked list
+   */
+  public flatMap(callbackFn: MapCallback<T, T | RecursiveLinkedList<T>>, thisArg?: any): RecursiveLinkedList<T> {
+    const callFunc = callbackFn.bind(thisArg);
+    const result: RecursiveLinkedList<T> = new LinkedList<T | RecursiveLinkedList<T>>();
+    let index = 0;
+
+    for (const value of this) {
+      const maybeList = callFunc(value, index, this);
+
+      if (LinkedList.isLinkedList(maybeList)) {
+        const subList: RecursiveLinkedList<T> = maybeList as RecursiveLinkedList<T>;
+
+        for (const newValue of subList) {
+          result.push(newValue );
+        }
+      } else {
+        result.push(maybeList);
+      }
+      index++;
     }
     return result;
   }
@@ -1540,10 +1580,6 @@ export class LinkedList<T> implements Iterable<T> {
   public static isIterable(arg: unknown): boolean {
     return LinkedList.isObject(arg) && 'next' in (arg as any) && typeof (arg as any)['next'] === 'function';
   }
-
-  /* TODO
-   flatMap
-   */
 }
 
 /**
