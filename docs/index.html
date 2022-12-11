@@ -16,18 +16,18 @@
 <li>and is well-tested;</li>
 <li>and is suitable for professional Software Engineering projects.</li>
 </ul>
-<p>The project focuses on backend development with NodeJs in mind.  However, as it is written
+<p>The project focuses on backend development with NodeJs in mind. However, as it is written
 in TypeScript (which compiles to JavaScript), you can use it in code targeting browsers.</p>
 
 <a href="#what39s-wrong-with-arrays" id="what39s-wrong-with-arrays" style="color: inherit; text-decoration: none;">
   <h2>What&#39;s wrong with Arrays?</h2>
 </a>
 <p>Arrays are a powerful and well-used data structure in both JavaScript and TypeScript.</p>
-<p>However, some operations are O(n) in Time Complexity.  These include shift and unshift.</p>
+<p>However, some array operations are O(n) in Time Complexity. These include <code>shift</code> and <code>unshift</code>.</p>
 <p>This means working with large datasets is usually faster with a Linked List compared to an Array.</p>
 
 <a href="#time-space-trade-off" id="time-space-trade-off" style="color: inherit; text-decoration: none;">
-  <h3>Time-Space trade off</h3>
+  <h2>Time-space trade off</h2>
 </a>
 <p>Linked lists are a classic time-space tradeoff when compared with arrays
 for some operations.</p>
@@ -38,20 +38,52 @@ operations.</p>
 <p>Most linked list operations are similar in speed to array.</p>
 
 <a href="#operations-faster-than-array" id="operations-faster-than-array" style="color: inherit; text-decoration: none;">
-  <h4>Operations faster than array</h4>
+  <h3>Operations faster than array</h3>
 </a>
 <ul>
 <li>shift</li>
 <li>unshift</li>
 </ul>
-<p><em>These operations are 200-300 times faster than an array!</em></p>
+<p><em>These operations are <strong>many hundreds to thousands of times faster</strong> than an array!</em></p>
+<p>If you&#39;re working with lists of 10&#39;s or 100&#39;s of thousands of elements, and you need these operations,
+you should consider a linked list instead of an array for storing those elements.</p>
 
 <a href="#operations-slower-than-array" id="operations-slower-than-array" style="color: inherit; text-decoration: none;">
-  <h4>Operations slower than array</h4>
+  <h3>Operations slower than array</h3>
 </a>
+<p>Some linked list operations are significantly slower than an array because the list must
+be traversed from beginning to some point in the list (usually all the way to the end).</p>
 <ul>
-<li>slice</li>
 <li>at</li>
+<li>fill</li>
+<li>lastIndexOf</li>
+<li>pop</li>
+<li>slice</li>
+</ul>
+<p>If your use case requires these operations on a large lists, then you should consider using
+a different data structure (such as Array).</p>
+
+<a href="#operations-not-implemented" id="operations-not-implemented" style="color: inherit; text-decoration: none;">
+  <h3>Operations not implemented</h3>
+</a>
+<p>The following operations cannot be implemented efficiently in a singly-linked list and
+are not implemented.</p>
+<p>These can be implemented in a doubly-linked list, and such a data structure is planned for a
+future release of this package.</p>
+<ul>
+<li>reverse</li>
+<li>reduceRight</li>
+</ul>
+
+<a href="#code-size" id="code-size" style="color: inherit; text-decoration: none;">
+  <h2>Code size</h2>
+</a>
+<p>The majority of the code in this package is contained in unit tests.</p>
+<p>Code sizes:</p>
+<ul>
+<li>The compiled Typescript is 7 kilobytes when minified.</li>
+<li>The full JavaScript code including comments is around 40 kilobytes.</li>
+<li>The unit tests are around 120 kilobytes.</li>
 </ul>
 
 <a href="#getting-started" id="getting-started" style="color: inherit; text-decoration: none;">
@@ -73,35 +105,42 @@ operations.</p>
 <pre><code class="language-shell"><span class="hl-0">npm --save-prod i generic-linked-list</span>
 </code></pre>
 
+<a href="#run-the-examples" id="run-the-examples" style="color: inherit; text-decoration: none;">
+  <h3>Run the examples</h3>
+</a>
+<p><strong>Plain JavaScript:</strong></p>
+<pre><code class="language-shell"><span class="hl-0">$ node dist/examples/plainjs.js</span><br/><span class="hl-0">A simple numeric list is [ 0, 1, 2 ]</span>
+</code></pre>
+<p><strong>Typescript (directly):</strong></p>
+<pre><code class="language-shell"><span class="hl-0">$ ts-node src/examples/example.ts a b c </span><br/><span class="hl-0">Your linked list is a,b,c</span><br/><br/><span class="hl-0">A list of numbers expanded using spread syntax [ 1, 2, 3 ]</span><br/><span class="hl-0">The same list converted to a string [1,2,3]</span><br/><br/><span class="hl-0">Let us build a list of Person objects...</span><br/><span class="hl-0">A list of people expanded using spread syntax { name: </span><span class="hl-1">&#39;John&#39;</span><span class="hl-0">, age: 12, parent: { name: </span><span class="hl-1">&#39;John&#39;</span><span class="hl-0">, age: 42 } } { name: </span><span class="hl-1">&#39;Kylie&#39;</span><span class="hl-0">, age: 14 }</span><br/><span class="hl-0">The same list converted to a string {</span><span class="hl-1">&quot;name&quot;</span><span class="hl-0">:</span><span class="hl-1">&quot;John&quot;</span><span class="hl-0">,</span><span class="hl-1">&quot;age&quot;</span><span class="hl-0">:12,</span><span class="hl-1">&quot;parent&quot;</span><span class="hl-0">:{</span><span class="hl-1">&quot;name&quot;</span><span class="hl-0">:</span><span class="hl-1">&quot;John&quot;</span><span class="hl-0">,</span><span class="hl-1">&quot;age&quot;</span><span class="hl-0">:42}},{</span><span class="hl-1">&quot;name&quot;</span><span class="hl-0">:</span><span class="hl-1">&quot;Kylie&quot;</span><span class="hl-0">,</span><span class="hl-1">&quot;age&quot;</span><span class="hl-0">:14}</span><br/><br/><span class="hl-0">Here</span><span class="hl-1">&#39;s the array after converting the people list to an array:</span><br/><span class="hl-1">[</span><br/><span class="hl-1">  { name: &#39;</span><span class="hl-0">John</span><span class="hl-1">&#39;, age: 12, parent: { name: &#39;</span><span class="hl-0">John</span><span class="hl-1">&#39;, age: 42 } },</span><br/><span class="hl-1">  { name: &#39;</span><span class="hl-0">Kylie</span><span class="hl-1">&#39;, age: 14 }</span><br/><span class="hl-1">]</span>
+</code></pre>
+<p><strong>Typescript (compiled):</strong></p>
+<pre><code class="language-shell"><span class="hl-0">$ yarn build</span><br/><span class="hl-0">$ node dist/examples/example.js a b c</span>
+</code></pre>
+<p><em>Same output as above.</em></p>
+
 <a href="#typescript-examples" id="typescript-examples" style="color: inherit; text-decoration: none;">
   <h3>TypeScript examples</h3>
 </a>
-
-<a href="#example-1" id="example-1" style="color: inherit; text-decoration: none;">
-  <h4>Example 1</h4>
-</a>
-<pre><code class="language-typescript"><span class="hl-1">import</span><span class="hl-0"> { </span><span class="hl-2">LinkedList</span><span class="hl-0"> } </span><span class="hl-1">from</span><span class="hl-0"> </span><span class="hl-3">&#39;generic-linked-list&#39;</span><span class="hl-0">;</span><br/><br/><span class="hl-4">const</span><span class="hl-0"> </span><span class="hl-5">numList</span><span class="hl-0"> = </span><span class="hl-4">new</span><span class="hl-0"> </span><span class="hl-6">LinkedList</span><span class="hl-0">([</span><span class="hl-7">1</span><span class="hl-0">, </span><span class="hl-7">2</span><span class="hl-0">, </span><span class="hl-7">3</span><span class="hl-0">]);</span><br/><span class="hl-2">console</span><span class="hl-0">.</span><span class="hl-6">log</span><span class="hl-0">(...</span><span class="hl-2">numList</span><span class="hl-0">);</span><br/><span class="hl-2">console</span><span class="hl-0">.</span><span class="hl-6">log</span><span class="hl-0">(</span><span class="hl-2">numList</span><span class="hl-0">.</span><span class="hl-6">toString</span><span class="hl-0">());</span>
+<p><strong>Example 1</strong></p>
+<pre><code class="language-typescript"><span class="hl-2">import</span><span class="hl-0"> { </span><span class="hl-3">LinkedList</span><span class="hl-0"> } </span><span class="hl-2">from</span><span class="hl-0"> </span><span class="hl-1">&#39;generic-linked-list&#39;</span><span class="hl-0">;</span><br/><br/><span class="hl-4">const</span><span class="hl-0"> </span><span class="hl-5">numList</span><span class="hl-0"> = </span><span class="hl-4">new</span><span class="hl-0"> </span><span class="hl-6">LinkedList</span><span class="hl-0">([</span><span class="hl-7">1</span><span class="hl-0">, </span><span class="hl-7">2</span><span class="hl-0">, </span><span class="hl-7">3</span><span class="hl-0">]);</span><br/><span class="hl-3">console</span><span class="hl-0">.</span><span class="hl-6">log</span><span class="hl-0">(...</span><span class="hl-3">numList</span><span class="hl-0">);</span><br/><span class="hl-3">console</span><span class="hl-0">.</span><span class="hl-6">log</span><span class="hl-0">(</span><span class="hl-3">numList</span><span class="hl-0">.</span><span class="hl-6">toString</span><span class="hl-0">());</span>
 </code></pre>
 <p>Expected output:</p>
-<pre><code><span class="hl-7">1</span><span class="hl-0"> </span><span class="hl-7">2</span><span class="hl-0"> </span><span class="hl-7">3</span><br/><span class="hl-7">1</span><span class="hl-0">,</span><span class="hl-7">2</span><span class="hl-0">,</span><span class="hl-7">3</span>
+<pre><code class="language-text">[ 1, 2, 3 ]
+[1,2,3]
 </code></pre>
-
-<a href="#example-2" id="example-2" style="color: inherit; text-decoration: none;">
-  <h4>Example 2</h4>
-</a>
-<pre><code class="language-typescript"><span class="hl-1">import</span><span class="hl-0"> { </span><span class="hl-2">LinkedList</span><span class="hl-0"> } </span><span class="hl-1">from</span><span class="hl-0"> </span><span class="hl-3">&#39;generic-linked-list&#39;</span><span class="hl-0">;</span><br/><br/><span class="hl-4">type</span><span class="hl-0"> </span><span class="hl-8">Person</span><span class="hl-0"> = { </span><span class="hl-2">name</span><span class="hl-0">: </span><span class="hl-8">string</span><span class="hl-0">, </span><span class="hl-2">age</span><span class="hl-0">: </span><span class="hl-8">number</span><span class="hl-0">; </span><span class="hl-2">parent</span><span class="hl-0">?: </span><span class="hl-8">Person</span><span class="hl-0"> };</span><br/><span class="hl-4">const</span><span class="hl-0"> </span><span class="hl-5">peopleList</span><span class="hl-0"> = </span><span class="hl-4">new</span><span class="hl-0"> </span><span class="hl-6">LinkedList</span><span class="hl-0">&lt;</span><span class="hl-8">Person</span><span class="hl-0">&gt;();</span><br/><span class="hl-2">peopleList</span><span class="hl-0">.</span><span class="hl-6">push</span><span class="hl-0">(</span><br/><span class="hl-0">  {</span><span class="hl-2">name:</span><span class="hl-0"> </span><span class="hl-3">&#39;John&#39;</span><span class="hl-0">, </span><span class="hl-2">age:</span><span class="hl-0"> </span><span class="hl-7">12</span><span class="hl-0">, </span><span class="hl-2">parent:</span><span class="hl-0"> {</span><span class="hl-2">name :</span><span class="hl-3">&#39;John&#39;</span><span class="hl-0">, </span><span class="hl-2">age:</span><span class="hl-0"> </span><span class="hl-7">42</span><span class="hl-0">}},</span><br/><span class="hl-0">  {</span><span class="hl-2">name:</span><span class="hl-0"> </span><span class="hl-3">&#39;Kylie&#39;</span><span class="hl-0">, </span><span class="hl-2">age:</span><span class="hl-0"> </span><span class="hl-7">14</span><span class="hl-0">}</span><br/><span class="hl-0">);</span><br/><span class="hl-2">console</span><span class="hl-0">.</span><span class="hl-6">log</span><span class="hl-0">(...</span><span class="hl-2">peopleList</span><span class="hl-0">);</span><br/><span class="hl-2">console</span><span class="hl-0">.</span><span class="hl-6">log</span><span class="hl-0">(</span><span class="hl-2">peopleList</span><span class="hl-0">.</span><span class="hl-6">toString</span><span class="hl-0">());</span>
+<p><strong>Example 2</strong></p>
+<pre><code class="language-typescript"><span class="hl-2">import</span><span class="hl-0"> { </span><span class="hl-3">LinkedList</span><span class="hl-0"> } </span><span class="hl-2">from</span><span class="hl-0"> </span><span class="hl-1">&#39;generic-linked-list&#39;</span><span class="hl-0">;</span><br/><br/><span class="hl-4">type</span><span class="hl-0"> </span><span class="hl-8">Person</span><span class="hl-0"> = { </span><span class="hl-3">name</span><span class="hl-0">: </span><span class="hl-8">string</span><span class="hl-0">, </span><span class="hl-3">age</span><span class="hl-0">: </span><span class="hl-8">number</span><span class="hl-0">; </span><span class="hl-3">parent</span><span class="hl-0">?: </span><span class="hl-8">Person</span><span class="hl-0"> };</span><br/><span class="hl-4">const</span><span class="hl-0"> </span><span class="hl-5">peopleList</span><span class="hl-0"> = </span><span class="hl-4">new</span><span class="hl-0"> </span><span class="hl-6">LinkedList</span><span class="hl-0">&lt;</span><span class="hl-8">Person</span><span class="hl-0">&gt;();</span><br/><span class="hl-3">peopleList</span><span class="hl-0">.</span><span class="hl-6">push</span><span class="hl-0">(</span><br/><span class="hl-0">  {</span><span class="hl-3">name:</span><span class="hl-0"> </span><span class="hl-1">&#39;John&#39;</span><span class="hl-0">, </span><span class="hl-3">age:</span><span class="hl-0"> </span><span class="hl-7">12</span><span class="hl-0">, </span><span class="hl-3">parent:</span><span class="hl-0"> {</span><span class="hl-3">name:</span><span class="hl-0"> </span><span class="hl-1">&#39;John&#39;</span><span class="hl-0">, </span><span class="hl-3">age:</span><span class="hl-0"> </span><span class="hl-7">42</span><span class="hl-0">}},</span><br/><span class="hl-0">  {</span><span class="hl-3">name:</span><span class="hl-0"> </span><span class="hl-1">&#39;Kylie&#39;</span><span class="hl-0">, </span><span class="hl-3">age:</span><span class="hl-0"> </span><span class="hl-7">14</span><span class="hl-0">}</span><br/><span class="hl-0">);</span><br/><span class="hl-3">console</span><span class="hl-0">.</span><span class="hl-6">log</span><span class="hl-0">(...</span><span class="hl-3">peopleList</span><span class="hl-0">);</span><br/><span class="hl-3">console</span><span class="hl-0">.</span><span class="hl-6">log</span><span class="hl-0">(</span><span class="hl-3">peopleList</span><span class="hl-0">.</span><span class="hl-6">toString</span><span class="hl-0">());</span>
 </code></pre>
 <p>Expected output:</p>
-<pre><code><span class="hl-0">{ </span><span class="hl-9">name</span><span class="hl-0">: </span><span class="hl-3">&#39;John&#39;</span><span class="hl-0">, </span><span class="hl-9">age</span><span class="hl-0">: </span><span class="hl-7">12</span><span class="hl-0">, </span><span class="hl-9">parent</span><span class="hl-0">: { </span><span class="hl-9">name</span><span class="hl-0">: </span><span class="hl-3">&#39;John&#39;</span><span class="hl-0">, </span><span class="hl-9">age</span><span class="hl-0">: </span><span class="hl-7">42</span><span class="hl-0"> } } { </span><span class="hl-9">name</span><span class="hl-0">: </span><span class="hl-3">&#39;Kylie&#39;</span><span class="hl-0">, </span><span class="hl-9">age</span><span class="hl-0">: </span><span class="hl-7">14</span><span class="hl-0"> }</span><br/><span class="hl-0">{</span><span class="hl-3">&quot;name&quot;</span><span class="hl-0">:</span><span class="hl-3">&quot;John&quot;</span><span class="hl-0">,</span><span class="hl-3">&quot;age&quot;</span><span class="hl-0">:</span><span class="hl-7">12</span><span class="hl-0">,</span><span class="hl-3">&quot;parent&quot;</span><span class="hl-0">:{</span><span class="hl-3">&quot;name&quot;</span><span class="hl-2">:</span><span class="hl-3">&quot;John&quot;</span><span class="hl-0">,</span><span class="hl-3">&quot;age&quot;</span><span class="hl-2">:</span><span class="hl-7">42</span><span class="hl-0">}},{</span><span class="hl-3">&quot;name&quot;</span><span class="hl-2">:</span><span class="hl-3">&quot;Kylie&quot;</span><span class="hl-0">,</span><span class="hl-3">&quot;age&quot;</span><span class="hl-2">:</span><span class="hl-7">14</span><span class="hl-0">}</span>
+<pre><code class="language-text">{ name: &#39;John&#39;, age: 12, parent: { name: &#39;John&#39;, age: 42 } } { name: &#39;Kylie&#39;, age: 14 }
+{&quot;name&quot;:&quot;John&quot;,&quot;age&quot;:12,&quot;parent&quot;:{&quot;name&quot;:&quot;John&quot;,&quot;age&quot;:42}},{&quot;name&quot;:&quot;Kylie&quot;,&quot;age&quot;:14}
 </code></pre>
-
-<a href="#example-3-plain-javascript" id="example-3-plain-javascript" style="color: inherit; text-decoration: none;">
-  <h4>Example 3 (plain JavaScript)</h4>
-</a>
-<pre><code class="language-javascript"><span class="hl-4">const</span><span class="hl-0"> </span><span class="hl-5">LinkedList</span><span class="hl-0"> = </span><span class="hl-6">require</span><span class="hl-0">(</span><span class="hl-3">&#39;generic-linked-list&#39;</span><span class="hl-0">).</span><span class="hl-2">LinkedList</span><span class="hl-0">;</span><br/><br/><span class="hl-4">const</span><span class="hl-0"> </span><span class="hl-5">sampleList</span><span class="hl-0"> = </span><span class="hl-4">new</span><span class="hl-0"> </span><span class="hl-6">LinkedList</span><span class="hl-0">([</span><span class="hl-7">0</span><span class="hl-0">,</span><span class="hl-7">1</span><span class="hl-0">,</span><span class="hl-7">2</span><span class="hl-0">]);</span><br/><span class="hl-2">console</span><span class="hl-0">.</span><span class="hl-6">log</span><span class="hl-0">(</span><span class="hl-3">`Your linked list is </span><span class="hl-4">${</span><span class="hl-10">[</span><span class="hl-0">...</span><span class="hl-2">sampleList</span><span class="hl-10">]</span><span class="hl-4">}</span><span class="hl-3">`</span><span class="hl-0">);</span>
+<p><strong>Example 3 (plain JavaScript)</strong></p>
+<pre><code class="language-javascript"><span class="hl-4">const</span><span class="hl-0"> </span><span class="hl-5">LinkedList</span><span class="hl-0"> = </span><span class="hl-6">require</span><span class="hl-0">(</span><span class="hl-1">&#39;generic-linked-list&#39;</span><span class="hl-0">).</span><span class="hl-3">LinkedList</span><span class="hl-0">;</span><br/><br/><span class="hl-4">const</span><span class="hl-0"> </span><span class="hl-5">sampleList</span><span class="hl-0"> = </span><span class="hl-4">new</span><span class="hl-0"> </span><span class="hl-6">LinkedList</span><span class="hl-0">([</span><span class="hl-7">0</span><span class="hl-0">, </span><span class="hl-7">1</span><span class="hl-0">, </span><span class="hl-7">2</span><span class="hl-0">]);</span><br/><span class="hl-3">console</span><span class="hl-0">.</span><span class="hl-6">log</span><span class="hl-0">(</span><span class="hl-1">`Your linked list is </span><span class="hl-4">${</span><span class="hl-9">[</span><span class="hl-0">...</span><span class="hl-3">sampleList</span><span class="hl-9">]</span><span class="hl-4">}</span><span class="hl-1">`</span><span class="hl-0">);</span>
 </code></pre>
 <p>Expected output:</p>
-<pre><code><span class="hl-2">Your</span><span class="hl-0"> </span><span class="hl-2">linked</span><span class="hl-0"> </span><span class="hl-2">list</span><span class="hl-0"> </span><span class="hl-2">is</span><span class="hl-0"> </span><span class="hl-7">0</span><span class="hl-0">,</span><span class="hl-7">1</span><span class="hl-0">,</span><span class="hl-7">2</span>
+<pre><code class="language-text">Your linked list is 0,1,2
 </code></pre>
 
 <a href="#where-to-next" id="where-to-next" style="color: inherit; text-decoration: none;">
@@ -109,7 +148,8 @@ operations.</p>
 </a>
 <p>The documentation is generated using <a href="https://www.npmjs.com/package/typedoc">TypeDoc</a> using
 comments in the source code.</p>
-<p>The project&#39;s GitHub page contains the documentation and is <a href="https://russellrobinson.github.io/generic-linked-list/classes/linked_list.LinkedList.html">the best place to start</a>.</p>
+<p>The project&#39;s GitHub page contains the documentation and
+is <a href="https://russellrobinson.github.io/generic-linked-list/classes/linked_list.LinkedList.html">the best place to start</a>.</p>
 
 <a href="#example-code" id="example-code" style="color: inherit; text-decoration: none;">
   <h2>Example code</h2>
@@ -119,6 +159,89 @@ comments in the source code.</p>
 <li>download the package;</li>
 <li>look in the <code>src/examples</code> folder.</li>
 </ul>
+
+<a href="#version-2-compatibility" id="version-2-compatibility" style="color: inherit; text-decoration: none;">
+  <h2>Version 2 Compatibility</h2>
+</a>
+<p>Version 2 aims to be even closer to a drop-in replacement for Array.</p>
+<p>Version 2 implements additional constructor options to make LinkedList more similar to Array construction.
+It also clarifies the semantics of the <code>from</code> method.</p>
+<p>In particular, the constructor now implements both a length and an item list constructor.</p>
+
+<a href="#version-2-constructor" id="version-2-constructor" style="color: inherit; text-decoration: none;">
+  <h3>Version 2 Constructor</h3>
+</a>
+<p>This means that the following code in Version 1:</p>
+<pre><code class="language-typescript"><span class="hl-4">const</span><span class="hl-0"> </span><span class="hl-5">list</span><span class="hl-0"> = </span><span class="hl-4">new</span><span class="hl-0"> </span><span class="hl-6">LinkedList</span><span class="hl-0">&lt;</span><span class="hl-8">number</span><span class="hl-0">&gt;([</span><span class="hl-7">1</span><span class="hl-0">, </span><span class="hl-7">2</span><span class="hl-0">]);</span>
+</code></pre>
+<p>must be changed to:</p>
+<pre><code class="language-typescript"><span class="hl-4">const</span><span class="hl-0"> </span><span class="hl-5">list</span><span class="hl-0"> = </span><span class="hl-4">new</span><span class="hl-0"> </span><span class="hl-6">LinkedList</span><span class="hl-0">&lt;</span><span class="hl-8">number</span><span class="hl-0">&gt;(...[</span><span class="hl-7">1</span><span class="hl-0">, </span><span class="hl-7">2</span><span class="hl-0">]);</span>
+</code></pre>
+<p>or</p>
+<pre><code class="language-typescript"><span class="hl-4">const</span><span class="hl-0"> </span><span class="hl-5">list</span><span class="hl-0"> = </span><span class="hl-4">new</span><span class="hl-0"> </span><span class="hl-6">LinkedList</span><span class="hl-0">&lt;</span><span class="hl-8">number</span><span class="hl-0">&gt;(</span><span class="hl-7">1</span><span class="hl-0">, </span><span class="hl-7">2</span><span class="hl-0">);</span>
+</code></pre>
+<p>If you want to build a LinkedList from an array with the spread operator, use the <code>from</code> method:</p>
+<pre><code class="language-typescript"><span class="hl-4">const</span><span class="hl-0"> </span><span class="hl-5">list</span><span class="hl-0"> = </span><span class="hl-3">LinkedList</span><span class="hl-0">.</span><span class="hl-6">from</span><span class="hl-0">([</span><span class="hl-7">1</span><span class="hl-0">, </span><span class="hl-7">2</span><span class="hl-0">]);</span>
+</code></pre>
+
+<a href="#version-2-from-method" id="version-2-from-method" style="color: inherit; text-decoration: none;">
+  <h3>Version 2 <code>from</code> method</h3>
+</a>
+<p><code>LinkedList.from</code> behaves differently to Array when called with non-array constructors.  See the
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from#calling_from_on_non-array_constructors">documentation for Array</a> about this.</p>
+
+<a href="#version-history" id="version-history" style="color: inherit; text-decoration: none;">
+  <h2>Version History</h2>
+</a>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2.0.0</td>
+<td>11-Dec-2022</td>
+<td>Version 2 is mostly compatible with version 1, except for the following:<br/>* Constructor and <code>from</code> enhancements may require some refactoring of your existing version 1 code.<br/>* The <code>push</code> method also accepts an iterator.  <code>Array.push</code> does not support this. <br/>*  Added support for negative indexes in these methods:<ul><li><code>at</code><li><code>indexOf</code><li><code>includes</code><li><code>slice</code></ul><br/>* Added the following methods:<ul><li><code>entries</code><li><code>flat</code><li><code>flatMap</code><li><code>from</code><li><code>grow</code><li><code>join</code><li><code>keys</code><li><code>keysAsList</code><li><code>lastIndexOf</code><li><code>of</code><li><code>map</code><li><code>pop</code><li><code>reduce</code><li><code>splice</code><li><code>truncate</code></ul></td>
+</tr>
+<tr>
+<td>1.1.3</td>
+<td>11-Nov-2022</td>
+<td>Documentation and test improvements.</td>
+</tr>
+<tr>
+<td>1.1.2</td>
+<td>15-Oct-2022</td>
+<td>Added missing <code>index.ts</code> file.</td>
+</tr>
+<tr>
+<td>1.1.1</td>
+<td>15-Oct-2022</td>
+<td>Test improvements.</td>
+</tr>
+<tr>
+<td>1.1.0</td>
+<td>15-Oct-2022</td>
+<td>Added <code>slice</code> and <code>end</code> methods.</td>
+</tr>
+<tr>
+<td>1.0.3</td>
+<td>22-Sep-2022</td>
+<td>Documentation and test improvements.</td>
+</tr>
+<tr>
+<td>1.0.1</td>
+<td>17-Sep-2022</td>
+<td>Documentation improvements.</td>
+</tr>
+<tr>
+<td>1.0.0</td>
+<td>17-Sep-2022</td>
+<td>First &quot;official&quot; release.</td>
+</tr>
+</tbody></table>
 
 <a href="#nodejs-version" id="nodejs-version" style="color: inherit; text-decoration: none;">
   <h2>Node.js version</h2>
@@ -136,5 +259,5 @@ version of TypeScript.</p>
   <h2>About the author</h2>
 </a>
 <p>Russell Robinson is a Software Engineer with decades of experience across a range of industries.</p>
-<p>He lives in Melbourne, Australia, and can be contacted by email.</p>
+<p>He lives in Melbourne, Australia and can be contacted via email (<a href="mailto:russellr@openconcepts.com.au">russellr@openconcepts.com.au</a>).</p>
 </div></div><div class="col-4 col-menu menu-sticky-wrap menu-highlight"><nav class="tsd-navigation primary"><ul><li class="current"><a href="modules.html">Modules</a></li><li class=" tsd-kind-module"><a href="modules/index.html">index</a></li><li class=" tsd-kind-module"><a href="modules/linked_list.html">linked-<wbr/>list</a></li></ul></nav></div></div></div><footer class="with-border-bottom"><div class="container"><h2>Legend</h2><div class="tsd-legend-group"><ul class="tsd-legend"><li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li></ul><ul class="tsd-legend"><li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li></ul></div><h2>Settings</h2><p>Theme <select id="theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></p></div></footer><div class="container tsd-generator"><p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div><div class="overlay"></div><script src="assets/main.js"></script></body></html>

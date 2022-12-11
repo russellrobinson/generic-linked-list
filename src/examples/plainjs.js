@@ -2,9 +2,7 @@
  * Copyright (c) 2022 Russell Robinson <russellr@openconcepts.com.au>
  */
 
-// import {LinkedList} from '../linked-list';
-
-import {LinkedList} from '../../dist/linked-list.js';
+import {LinkedList} from '../linked-list';
 
 const sampleList = new LinkedList([0,1,2]);
-console.log(`Your linked list is ${[...sampleList]}`);
+console.log(`A simple numeric list is`, ...sampleList);
