@@ -640,28 +640,29 @@ export class LinkedList<T> implements Iterable<T> {
    * Create a new LinkedList populated with the results of calling the provided function
    * on every element in the LinkedList and then flattening the list by a depth of 1.
    *
-   * It is identical to a map() followed by a `flat` of depth 1 (list.map(...args).flat()),
+   * It is identical to a `map` followed by a `flat` of depth 1 (list.map(...args).flat()),
    * but slightly more efficient than calling those two methods separately.
    *
    * @param callbackFn   the function to call to map each element
    * @param thisArg      a "this" value to bind to the callback function
-   * @returns a new linked list with each element being the result of the callback function
+   * @returns a new linked list with each element being the result of the callback function and then the list
+   *          flattened by a depth of 1.
    *
    * #### Complexity: O(n) where n is the length of the linked list
    */
-  public flatMap(callbackFn: MapCallback<T, T | RecursiveLinkedList<T>>, thisArg?: any): RecursiveLinkedList<T> {
+  public flatMap<U = T>(callbackFn: MapCallback<T, U | RecursiveLinkedList<U>>, thisArg?: any): RecursiveLinkedList<U> {
     const callFunc = callbackFn.bind(thisArg);
-    const result: RecursiveLinkedList<T> = new LinkedList<T | RecursiveLinkedList<T>>();
+    const result: RecursiveLinkedList<U> = new LinkedList<U | RecursiveLinkedList<U>>();
     let index = 0;
 
     for (const value of this) {
       const maybeList = callFunc(value, index, this);
 
       if (LinkedList.isLinkedList(maybeList)) {
-        const subList: RecursiveLinkedList<T> = maybeList as RecursiveLinkedList<T>;
+        const subList: RecursiveLinkedList<U> = maybeList as RecursiveLinkedList<U>;
 
         for (const newValue of subList) {
-          result.push(newValue );
+          result.push(newValue);
         }
       } else {
         result.push(maybeList);

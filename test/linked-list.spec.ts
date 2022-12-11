@@ -1198,6 +1198,59 @@ describe('linked-list', () => {
           }
         }
       });
+      it('can work like flat', () => {
+        const fixture = [[1], [2], [3], [4]];
+        const expected = [1, 2, 3, 4];
+
+        const arr = [...fixture];
+        const arrResult = arr.flatMap((x) => x);
+        expect(arrResult).to.deep.equal(expected);
+
+        const list = new LinkedList<LinkedList<number>>();
+        for (const subArray of fixture) {
+          const subList = new LinkedList<number>();
+          subList.push(subArray[0]);
+
+          list.push(subList);
+        }
+
+        const listResult = list.flatMap((x) => x);
+        expect(Array.from(listResult)).to.deep.equal(expected);
+      });
+      it('can work like map', () => {
+        const fixture = [1, 2, 3, 4];
+        const expected = [2, 4, 6, 8];
+
+        const arr = [...fixture];
+        const arrResult = arr.flatMap((x) => x * 2);
+        expect(arrResult).to.deep.equal(expected);
+
+        const list = LinkedList.from(fixture);
+        const listResult = list.flatMap((x) => x * 2);
+        expect(Array.from(listResult)).to.deep.equal(expected);
+      });
+      it('binds the thisArg', () => {
+        class Mapper {
+          doMap(index: number): number {
+            return index * 2;
+          }
+        }
+
+        const mapper = new Mapper();
+
+        const fixture = ['a', 'b', 'c', 'd'];
+        const list = new LinkedList<string>(...fixture);
+        const result = list.flatMap(function (this: Mapper, value, index) {
+          return this.doMap(index);
+        }, mapper);
+
+        expect(result.length).to.equal(4);
+        expect(result).to.not.equal(list);
+        expect(result.at(0)).to.equal(0);
+        expect(result.at(1)).to.equal(2);
+        expect(result.at(2)).to.equal(4);
+        expect(result.at(3)).to.equal(6);
+      });
       it('has a use like array (generating a list of words from a list of sentences)', () => {
         const fixture = ["it's Sunny in", "", "California"];
         const expected = ["it's", "Sunny", "in", "", "California"];
