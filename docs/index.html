@@ -54,11 +54,11 @@ you should consider a linked list instead of an array for storing those elements
 <p>Some linked list operations are significantly slower than an array because the list must
 be traversed from beginning to some point in the list (usually all the way to the end).</p>
 <ul>
-<li>slice</li>
 <li>at</li>
-<li>pop</li>
-<li>lastIndexOf</li>
 <li>fill</li>
+<li>lastIndexOf</li>
+<li>pop</li>
+<li>slice</li>
 </ul>
 <p>If your use case requires these operations on a large lists, then you should consider using
 a different data structure (such as Array).</p>
@@ -68,7 +68,7 @@ a different data structure (such as Array).</p>
 </a>
 <p>The following operations cannot be implemented efficiently in a singly-linked list and
 are not implemented.</p>
-<p>These can be implemented in a doubly-linked list, and such a data strcuture is planned for a
+<p>These can be implemented in a doubly-linked list, and such a data structure is planned for a
 future release of this package.</p>
 <ul>
 <li>reverse</li>
@@ -202,7 +202,7 @@ It also clarifies the semantics of the <code>from</code> method.</p>
 </tr>
 </thead>
 <tbody><tr>
-<td>2.0.0-rc11</td>
+<td>2.0.0</td>
 <td>11-Dec-2022</td>
 <td>Version 2 is mostly compatible with version 1, except for the following:<br/>* Constructor and <code>from</code> enhancements may require some refactoring of your existing version 1 code.<br/>* The <code>push</code> method also accepts an iterator.  <code>Array.push</code> does not support this. <br/>*  Added support for negative indexes in these methods:<ul><li><code>at</code><li><code>indexOf</code><li><code>includes</code><li><code>slice</code></ul><br/>* Added the following methods:<ul><li><code>entries</code><li><code>flat</code><li><code>flatMap</code><li><code>from</code><li><code>grow</code><li><code>join</code><li><code>keys</code><li><code>keysAsList</code><li><code>lastIndexOf</code><li><code>of</code><li><code>map</code><li><code>pop</code><li><code>reduce</code><li><code>splice</code><li><code>truncate</code></ul></td>
 </tr>
