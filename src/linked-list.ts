@@ -643,8 +643,16 @@ export class LinkedList<T> implements Iterable<T> {
    * It is identical to a `map` followed by a `flat` of depth 1 (list.map(...args).flat()),
    * but slightly more efficient than calling those two methods separately.
    *
+   * However, in this case, the callback function can return a single value or a linked list.
+   * In that latter case, `flatMap` extracts the values from that linked list and
+   * inserts them in the final list that will be returned from `flatMap`.
+   * This is where `flatMap` is faster than calling `map` followed by `flat` - because it only
+   * traverses in the input list once and still achieves the flattening.
+   *
    * @param callbackFn   the function to call to map each element
    * @param thisArg      a "this" value to bind to the callback function
+   * @typeParam U        the basic return type of the `callbackFn` (noting that `callBackFn` can return
+   *                     `U` or a `RecursiveLinkedList<U>`
    * @returns a new linked list with each element being the result of the callback function and then the list
    *          flattened by a depth of 1.
    *
@@ -940,6 +948,7 @@ export class LinkedList<T> implements Iterable<T> {
    * on every element in the LinkedList.
    * @param callbackFn   the function to call to map each element
    * @param thisArg      a "this" value to bind to the callback function
+   * @typeParam U        the return type of the `callbackFn`
    * @returns a new linked list with each element being the result of the callback function
    *
    * #### Complexity: O(n) where n is the length of the linked list

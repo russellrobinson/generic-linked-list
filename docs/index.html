@@ -43,6 +43,7 @@ operations.</p>
 <ul>
 <li>shift</li>
 <li>unshift</li>
+<li>splice</li>
 </ul>
 <p><em>These operations are <strong>many hundreds to thousands of times faster</strong> than an array!</em></p>
 <p>If you&#39;re working with lists of 10&#39;s or 100&#39;s of thousands of elements, and you need these operations,
@@ -202,6 +203,11 @@ It also clarifies the semantics of the <code>from</code> method.</p>
 </tr>
 </thead>
 <tbody><tr>
+<td>2.0.1</td>
+<td>11-Dec-2022</td>
+<td>Some documentation improvements.</td>
+</tr>
+<tr>
 <td>2.0.0</td>
 <td>11-Dec-2022</td>
 <td>Version 2 is mostly compatible with version 1, except for the following:<br/>* Constructor and <code>from</code> enhancements may require some refactoring of your existing version 1 code.<br/>* The <code>push</code> method also accepts an iterator.  <code>Array.push</code> does not support this. <br/>*  Added support for negative indexes in these methods:<ul><li><code>at</code><li><code>indexOf</code><li><code>includes</code><li><code>slice</code></ul><br/>* Added the following methods:<ul><li><code>entries</code><li><code>flat</code><li><code>flatMap</code><li><code>from</code><li><code>grow</code><li><code>join</code><li><code>keys</code><li><code>keysAsList</code><li><code>lastIndexOf</code><li><code>of</code><li><code>map</code><li><code>pop</code><li><code>reduce</code><li><code>splice</code><li><code>truncate</code></ul></td>
